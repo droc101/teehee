@@ -144,12 +144,14 @@ public class main {
             //fb.drawRect(0, 0, width, height / 2, new Color(0x0000FF));
 
             // Fill the bottom half of the screen with green
-            //fb.drawRect(0, height / 2, width, height / 2, new Color(0x00FF00));
 
             RayTracer rt = new RayTracer(currentLevel);
             
             for (int x = 0; x < width; x++) {
+                
                 rt.RenderCol(fb, playerPos, playerRot, x, height);
+                // Fill the bottom half of the screen with green
+                
             }
 
             fb.DrawString(playerPos.toString(), new Vector2(10, 10), new Color(0xFFFFFF));

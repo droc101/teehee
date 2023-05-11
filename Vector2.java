@@ -30,4 +30,8 @@ public class Vector2 {
     public Vector2 clone() {
         return new Vector2(x, y);
     }
+
+    public Vector2 sub(Vector2 vertA) {
+        return new Vector2(x - vertA.x, y - vertA.y);
+    }
 }

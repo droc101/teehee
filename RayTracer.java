@@ -1,3 +1,9 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 public class RayTracer {
     Level level;
 
@@ -17,8 +23,49 @@ public class RayTracer {
         for (Wall wall : level.walls) {
             // Check if the ray intersects the wall
             if (ray.Intersects(wall)) {
+                // Get the wall's texture
+                String wallTex = "texture/" + wall.texture + ".png";
+                // Load the texture using ImageIO
+                BufferedImage tex = null;
+                try {
+                    tex = ImageIO.read(new File(wallTex));
+                } catch (IOException e) {
+                    // Load texture/missing.png instead
+                    try {
+                        tex = ImageIO.read(new File("texture/missing.png"));
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+
+                // Get the height of the texture
+                int texH = tex.getHeight();
+                // Get the width of the texture
+                int texW = tex.getWidth();
+
+                
+
+
+                //!BUG! ArrayIndexOutOfBoundsException: Coordinate out of bounds!
                 // Get the intersection point
                 Vector2 intersection = ray.Intersection(wall);
+
+                // Convert intersection point to local coordinates of the wall
+                Vector2 local = intersection.sub(wall.vertA);
+
+                // Update the local coords to make vertA the origin
+                local = local.sub(wall.vertA);
+
+                // Get the length of the wall
+                double wallLength = Vector2.Distance(wall.vertA, wall.vertB);
+
+                // Get the column of the texture so that 1 world unit = 1 texture width
+                double texCol = local.x / wallLength * texW;
+
+                // Mod the column by the texture width to make sure it is between 0 and 1
+                texCol = texCol - Math.floor(texCol / texW) * texW;
+
+                // texCol = 0;
 
                 // Get the distance from the ray origin to the intersection point
                 double distance = Vector2.Distance(FromPos, intersection) * Math.cos(angle - FromRot);
@@ -40,8 +87,26 @@ public class RayTracer {
                 int b = (int) (255 * shade);
                 Color color = new Color(r, g, b);
 
-                // Draw the wall
-                buffer.drawRect(col, (int) y, 1, (int) height, color);
+                // Draw the wall using its texture and shade
+                for (int i = 0; i < height; i++) {
+                    // Get the y position of the texture
+                    int texY = (int) (i / height * texH);
+                    // Get the color of the pixel in the texture
+                    System.out.println(texCol + " " + texY);
+                    int texColor = tex.getRGB((int)texCol, texY);
+                    // Get the color of the pixel in the texture
+                    int texR = (texColor >> 16) & 0xFF;
+                    int texG = (texColor >> 8) & 0xFF;
+                    int texB = (texColor >> 0) & 0xFF;
+                    // Calculate the color of the pixel on the wall
+                    r = (int) (texR * shade);
+                    g = (int) (texG * shade);
+                    b = (int) (texB * shade);
+                    color = new Color(r, g, b);
+                    // Draw the pixel
+                    buffer.setPixel(col, (int) y + i, color);
+                }
+                //buffer.drawRect(col, (int) y, 1, (int) height, color);
 
                 // Return
                 return;

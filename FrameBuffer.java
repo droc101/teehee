@@ -79,6 +79,12 @@ public class FrameBuffer {
         }
     }
 
+    public void drawFastVLine(int x, int y, int h, Color color) {
+        for(int i = y; i < y + h; i++) {
+            setPixel(x, i, color);
+        }
+    }
+
     public void DrawString(String s, Vector2 pos, Color color) {
         int x = (int)pos.x;
         int y = (int)pos.y;
