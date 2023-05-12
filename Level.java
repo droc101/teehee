@@ -36,6 +36,7 @@ public class Level {
 
         LoadMode mode = LoadMode.HEADER;
         ArrayList<int[]> tempWalls = new ArrayList<>();
+        ArrayList<String> tempWallTex = new ArrayList<String>();
         // Loop over each line of the level
         for (String line : level) {
             // Check if the ine begins with "["
@@ -94,6 +95,7 @@ public class Level {
                         parts = line.split(",");
                         // Add to tempWalls
                         tempWalls.add(new int[] { Integer.parseInt(parts[0]), Integer.parseInt(parts[1]) });
+                        tempWallTex.add(parts[2]);
                         break;
                     case SECTORS:
                         // Split the line into two parts
@@ -107,8 +109,10 @@ public class Level {
             }
         }
         // Convert tempWalls to walls
+        int i = 0;
         for (int[] wall : tempWalls) {
-            walls.add(new Wall(verts.get(wall[0]), verts.get(wall[1])));
+            walls.add(new Wall(verts.get(wall[0]), verts.get(wall[1]), tempWallTex.get(i)));
+            i++;
         }
     }
 }

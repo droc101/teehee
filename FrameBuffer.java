@@ -58,7 +58,7 @@ public class FrameBuffer {
             g.fillRect(i % width, i / width, 1, 1);
         }
         // Draw the image to the frame scaled to the frame's size
-        frame.getGraphics().drawImage(img, 0, 0, null);
+        frame.getGraphics().drawImage(img, 0, 0, frame.getWidth(), frame.getHeight(), null);
 
         // Dispose of the graphics context
         g.dispose();

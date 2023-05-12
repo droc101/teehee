@@ -22,7 +22,8 @@ public class main {
         // Make the window float in i3
         frame.setAlwaysOnTop(true);
         frame.setResizable(false);
-        frame.setUndecorated(false);
+        frame.setUndecorated(true);
+        frame.setPreferredSize(new Dimension(800, 600));
         frame.pack();
         frame.setVisible(true);
         frame.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -137,8 +138,8 @@ public class main {
                 continue;
             }
 
-            FrameBuffer fb = new FrameBuffer(width, height);
-            //FrameBuffer fb = new FrameBuffer(640, 480);
+            //FrameBuffer fb = new FrameBuffer(width, height);
+            FrameBuffer fb = new FrameBuffer(640, 480);
 
             // Fill the top half of the screen with blue
             //fb.drawRect(0, 0, width, height / 2, new Color(0x0000FF));
@@ -148,6 +149,9 @@ public class main {
             RayTracer rt = new RayTracer(currentLevel);
             
             for (int x = 0; x < width; x++) {
+                // Fill the top half of the screen with blue
+                fb.drawFastVLine(x, 0, fb.height/2, new Color(0,0,255));
+                fb.drawFastVLine(x, fb.height/2, fb.height/2, new Color(0,255,0));
                 
                 rt.RenderCol(fb, playerPos, playerRot, x, height);
                 // Fill the bottom half of the screen with green
@@ -157,11 +161,11 @@ public class main {
             fb.DrawString(playerPos.toString(), new Vector2(10, 10), new Color(0xFFFFFF));
 
             fb.draw(frame);
-            try {
-                Thread.sleep(1000 / TargetFPS);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
+            // try {
+            //     Thread.sleep(1000 / TargetFPS);
+            // } catch(Exception e) {
+            //     e.printStackTrace();
+            // }
             frameCount++;
         }
 

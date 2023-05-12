@@ -50,20 +50,15 @@ public class RayTracer {
                 // Get the intersection point
                 Vector2 intersection = ray.Intersection(wall);
 
-                // Convert intersection point to local coordinates of the wall
-                Vector2 local = intersection.sub(wall.vertA);
-
-                // Update the local coords to make vertA the origin
-                local = local.sub(wall.vertA);
-
                 // Get the length of the wall
                 double wallLength = Vector2.Distance(wall.vertA, wall.vertB);
 
-                // Get the column of the texture so that 1 world unit = 1 texture width
-                double texCol = local.x / wallLength * texW;
+                // Get the local x position of the intersection point
+                double localX = Vector2.Distance(wall.vertA, intersection);
 
-                // Mod the column by the texture width to make sure it is between 0 and 1
-                texCol = texCol - Math.floor(texCol / texW) * texW;
+                double texCol = localX / wallLength * texW;
+                texCol *= wallLength;
+                texCol %= texW;
 
                 // texCol = 0;
 
@@ -92,7 +87,7 @@ public class RayTracer {
                     // Get the y position of the texture
                     int texY = (int) (i / height * texH);
                     // Get the color of the pixel in the texture
-                    System.out.println(texCol + " " + texY);
+                    //System.out.println(texCol + " " + texY);
                     int texColor = tex.getRGB((int)texCol, texY);
                     // Get the color of the pixel in the texture
                     int texR = (texColor >> 16) & 0xFF;
