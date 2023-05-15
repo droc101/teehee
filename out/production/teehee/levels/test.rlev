@@ -15,7 +15,7 @@ Spawn=0,0,0
 1,2,null
 2,3,BLOB2
 3,0,null
-4,5,null
+4,5,ICON
 5,6,BLOB2
 6,7,null
 7,4,null

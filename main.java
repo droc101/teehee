@@ -3,7 +3,7 @@ import java.awt.Dimension;
 
 public class main {
 
-    final static int TargetFPS = 60;
+    final static int TargetFPS = 15;
 
     // Dict of key states
     enum KeyState {
@@ -24,11 +24,13 @@ public class main {
 
         //1. Create the frame.
         JFrame frame = new JFrame("GAME AND");
+
+        frame.setIconImage(new ImageIcon("texture/ICON.png").getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.setLocationRelativeTo(null);
         frame.setAlwaysOnTop(true);
-        frame.setResizable(false);
+        //frame.setResizable(false);
         frame.setBackground(java.awt.Color.BLACK);
 
         frame.setPreferredSize(new Dimension(800, 600));
@@ -115,6 +117,8 @@ public class main {
 
         Level currentLevel = new Level("test");
 
+        currentLevel.entities.add(new TestEntity(new Vector2(5,5), 0));
+
         Vector2 playerPos = new Vector2(2.5, 2.5);
         double playerRot = Math.PI * 1.5;
 
@@ -196,6 +200,12 @@ public class main {
             // Check if the frame took too long to render
             if (frameTime > 1000 / TargetFPS) {
                 System.out.println("Frame took too long to render: " + frameTime + "ms");
+                // Wait for the next frame
+                try {
+                    Thread.sleep(Math.max(0, (1000 / TargetFPS) - frameTime));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             // Wait for the next frame

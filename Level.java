@@ -61,14 +61,14 @@ public class Level {
             } else {
                 switch (mode) {
                     case HEADER:
-                        // Split the line into two parts seperated by =
+                        // Split the line into two parts separated by =
                         String[] parts = line.split("=");
                         switch (parts[0]) {
                             case "Name":
                                 name = parts[1];
                                 break;
                             case "Spawn":
-                                // Split the line into two parts seperated by ,
+                                // Split the line into two parts separated by ,
                                 String[] spawnParts = parts[1].split(",");
                                 // Create a new vector from the two parts
                                 spawn = new Vector2(Double.parseDouble(spawnParts[0]),

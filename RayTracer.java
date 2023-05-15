@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -17,6 +18,17 @@ public class RayTracer {
         // FOV is 90 degrees
         double angle = Math.atan2(col - buffer.width / 2, buffer.width / 2) + FromRot;
 
+        ArrayList<Wall> walls = new ArrayList<Wall>();
+        // Copy level.walls to walls
+        for (Wall wall : level.walls) {
+            walls.add(wall);
+        }
+        // Loop over each entity
+        for (Entity entity : level.entities) {
+            // Check if the entity is a wall
+            walls.add(entity.makeWall());
+        }
+
         // Create a ray
         Ray ray = new Ray(FromPos, angle);
         // Loop over each wall until a wall is hit
@@ -24,7 +36,7 @@ public class RayTracer {
         // Look over each wall and get the closest one
         Wall closestWall = null;
         double closestDist = Double.MAX_VALUE;
-        for (Wall wall : level.walls) {
+        for (Wall wall : walls) {
             // Check if the ray intersects the wall
             if (ray.Intersects(wall)) {
                 // Get the intersection point
@@ -76,7 +88,7 @@ public class RayTracer {
                 double localX = Vector2.Distance(closestWall.vertA, intersection);
 
                 double texCol = localX / wallLength * texW;
-                texCol *= wallLength;
+                texCol *= (wallLength / 2);
                 texCol %= texW;
 
                 // texCol = 0;
