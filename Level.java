@@ -1,13 +1,13 @@
 import java.io.File; // Import the File class
 import java.io.FileNotFoundException; // Import this class to handle errors
-import java.util.ArrayList;
-import java.util.Scanner; // Import the Scanner class to read text files
+import java.util.*;
 
 public class Level {
 
     public ArrayList<Vector2> verts = new ArrayList<Vector2>();
     public ArrayList<Wall> walls = new ArrayList<Wall>();
-    public ArrayList<int[]> sectors = new ArrayList<int[]>(); // Wall indexes
+
+    public ArrayList<Entity> entities = new ArrayList<Entity>();
     public String name;
     public Vector2 spawn;
     public double spawnRot;
@@ -15,8 +15,7 @@ public class Level {
     enum LoadMode {
         HEADER,
         VERTS,
-        WALLS,
-        SECTORS
+        WALLS
     }
 
     public Level(String path) {
@@ -57,9 +56,6 @@ public class Level {
                         case "Walls":
                             mode = LoadMode.WALLS;
                             break;
-                        case "Sectors":
-                            mode = LoadMode.SECTORS;
-                            break;
                     }
                 }
             } else {
@@ -94,20 +90,13 @@ public class Level {
                         // Split the line into two parts
                         parts = line.split(",");
                         // Add to tempWalls
-                        tempWalls.add(new int[] { Integer.parseInt(parts[0]), Integer.parseInt(parts[1]) });
+                        tempWalls.add(new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])});
                         tempWallTex.add(parts[2]);
-                        break;
-                    case SECTORS:
-                        // Split the line into two parts
-                        parts = line.split(",");
-                        // Create a new sector from the two parts
-                        int[] sector = new int[] { Integer.parseInt(parts[0]), Integer.parseInt(parts[1]) };
-                        // Add the sector to the sectors list
-                        sectors.add(sector);
                         break;
                 }
             }
         }
+
         // Convert tempWalls to walls
         int i = 0;
         for (int[] wall : tempWalls) {
@@ -115,4 +104,5 @@ public class Level {
             i++;
         }
     }
+
 }

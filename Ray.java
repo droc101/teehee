@@ -13,11 +13,22 @@ public class Ray {
     }
 
     public double Cast(Level level) {
+        Wall closestWall = null;
+        double closestDist = Double.MAX_VALUE;
         for (Wall wall : level.walls) {
+            //System.out.println("rtgb");
             Vector2 intersection = Intersection(wall);
             if (intersection != null) {
-                return Vector2.Distance(origin, intersection);
+                double distance = Vector2.Distance(origin, intersection);
+                if (distance < closestDist) {
+                    closestWall = wall;
+                    closestDist = distance;
+                }
             }
+        }
+        // If no wall was hit, return -1
+        if (closestWall != null) {
+            return closestDist;
         }
         return -1;
     }

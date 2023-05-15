@@ -20,11 +20,30 @@ public class RayTracer {
         // Create a ray
         Ray ray = new Ray(FromPos, angle);
         // Loop over each wall until a wall is hit
+        
+        // Look over each wall and get the closest one
+        Wall closestWall = null;
+        double closestDist = Double.MAX_VALUE;
         for (Wall wall : level.walls) {
             // Check if the ray intersects the wall
             if (ray.Intersects(wall)) {
+                // Get the intersection point
+                Vector2 intersection = ray.Intersection(wall);
+                // Get the distance from the ray origin to the intersection point
+                double distance = Vector2.Distance(FromPos, intersection) * Math.cos(angle - FromRot);
+                // Check if the distance is less than the closest distance
+                if (distance < closestDist) {
+                    // Set the closest wall to the current wall
+                    closestWall = wall;
+                    // Set the closest distance to the current distance
+                    closestDist = distance;
+                }
+            }
+        }
+
+        if (closestWall == null) {return;}
                 // Get the wall's texture
-                String wallTex = "texture/" + wall.texture + ".png";
+                String wallTex = "texture/" + closestWall.texture + ".png";
                 // Load the texture using ImageIO
                 BufferedImage tex = null;
                 try {
@@ -48,13 +67,13 @@ public class RayTracer {
 
                 //!BUG! ArrayIndexOutOfBoundsException: Coordinate out of bounds!
                 // Get the intersection point
-                Vector2 intersection = ray.Intersection(wall);
+                Vector2 intersection = ray.Intersection(closestWall);
 
                 // Get the length of the wall
-                double wallLength = Vector2.Distance(wall.vertA, wall.vertB);
+                double wallLength = Vector2.Distance(closestWall.vertA, closestWall.vertB);
 
                 // Get the local x position of the intersection point
-                double localX = Vector2.Distance(wall.vertA, intersection);
+                double localX = Vector2.Distance(closestWall.vertA, intersection);
 
                 double texCol = localX / wallLength * texW;
                 texCol *= wallLength;
@@ -72,7 +91,7 @@ public class RayTracer {
                 double y = (buffer.height - height) / 2;
 
                 // Calcuate the shade of the wall based on the camera angle and wall normal
-                double shade = Math.abs(Math.cos((FromRot + (1.5*Math.PI)) - wall.getAngle()));
+                double shade = Math.abs(Math.cos((FromRot + (1.5*Math.PI)) - closestWall.getAngle()));
                 // Make sure the shade is between 40 and 255
                 shade = Math.max(0.4, Math.min(1, shade));
 
@@ -84,6 +103,8 @@ public class RayTracer {
 
                 // Draw the wall using its texture and shade
                 for (int i = 0; i < height; i++) {
+                    // Check if the Y pixel is on screen
+                    if (y + i < 0 || y + i >= buffer.height) continue;
                     // Get the y position of the texture
                     int texY = (int) (i / height * texH);
                     // Get the color of the pixel in the texture
@@ -105,8 +126,6 @@ public class RayTracer {
 
                 // Return
                 return;
-            }
-        }
     }
 
     // Ray trace from a position and rotation until a wall is hit
