@@ -1,6 +1,11 @@
+import java.util.HashMap;
+import java.util.Map;
+
 public class Ray {
     public Vector2 origin;
     public double direction;
+
+    private Map<Wall, Vector2> intersections = new HashMap<Wall, Vector2>();
 
     public Ray(Vector2 origin, double direction) {
         this.origin = origin;
@@ -34,6 +39,9 @@ public class Ray {
     }
 
     public Vector2 Intersection(Wall wall) {
+        if (intersections.containsKey(wall)) {
+            return intersections.get(wall);
+        }
         Vector2 wallVector = new Vector2(wall.vertB.x - wall.vertA.x, wall.vertB.y - wall.vertA.y);
         Vector2 rayVector = new Vector2(Math.cos(direction), Math.sin(direction));
 
@@ -48,7 +56,9 @@ public class Ray {
         if (t >= 0 && u >= 0 && u <= 1) {
             double intersectionX = origin.x + t * rayVector.x;
             double intersectionY = origin.y + t * rayVector.y;
-            return new Vector2(intersectionX, intersectionY);
+            Vector2 intersection = new Vector2(intersectionX, intersectionY);
+            intersections.put(wall, intersection);
+            return intersection;
         }
 
         return null; // No intersection

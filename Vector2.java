@@ -15,6 +15,10 @@ public class Vector2 {
         return new Vector2(Math.cos(playerRot), Math.sin(playerRot));
     }
 
+    public static Vector2 Direction(Vector2 position, Vector2 playerPos) {
+        return new Vector2(playerPos.x - position.x, playerPos.y - position.y).normalize();
+    }
+
     public Vector2 scale(double d) {
        return new Vector2(x * d, y * d);
     }

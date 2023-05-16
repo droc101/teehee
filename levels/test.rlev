@@ -2,6 +2,7 @@
 Name=TestLevel
 Spawn=0,0,0
 [Verts]
+# X,Y
 10,10
 20,-10
 -10,-30
@@ -11,6 +12,7 @@ Spawn=0,0,0
 -1,-1
 -1,1
 [Walls]
+# Vtx1,Vtx2,Texture
 0,1,BLOB2
 1,2,BLOB2
 2,3,BLOB2
@@ -18,4 +20,7 @@ Spawn=0,0,0
 4,5,ICON
 5,6,BLOB2
 6,7,ICON
-7,4,BLOB2
+[Sectors]
+# ; separated wall list, floor texture, ceiling texture, light level, floor height, ceiling height
+0;1;2;3,floor,ceiling,0.25,0,5
+4;5;6,floor,ceiling,1.0,1,2

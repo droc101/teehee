@@ -8,6 +8,8 @@ public class Level {
     public ArrayList<Wall> walls = new ArrayList<Wall>();
 
     public ArrayList<Entity> entities = new ArrayList<Entity>();
+
+    public ArrayList<Sector> sectors = new ArrayList<Sector>();
     public String name;
     public Vector2 spawn;
     public double spawnRot;
@@ -15,7 +17,8 @@ public class Level {
     enum LoadMode {
         HEADER,
         VERTS,
-        WALLS
+        WALLS,
+        SECTORS
     }
 
     public Level(String path) {
@@ -39,6 +42,9 @@ public class Level {
         ArrayList<String> tempWallTex = new ArrayList<String>();
         // Loop over each line of the level
         for (String line : level) {
+            if (line.charAt(0) == '#') {
+                continue;
+            }
             // Check if the ine begins with "["
             if (line.charAt(0) == '[') {
                 // Check if the line ends with "]"
@@ -56,6 +62,9 @@ public class Level {
                             break;
                         case "Walls":
                             mode = LoadMode.WALLS;
+                            break;
+                        case "Sectors":
+                            mode = LoadMode.SECTORS;
                             break;
                     }
                 }
@@ -94,6 +103,33 @@ public class Level {
                         tempWalls.add(new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])});
                         tempWallTex.add(parts[2]);
                         break;
+                    case SECTORS:
+                        // Split the line into two parts
+                        parts = line.split(",");
+                        // Create a new sector
+                        Sector sector = new Sector();
+                        // Split part 0 by semicolon
+                        String[] sectorWalls = parts[0].split(";");
+
+                        // Loop over each wall index and add it to the sector
+                        for (String wall : sectorWalls) {
+                            sector.wallIndices.add(Integer.parseInt(wall));
+                        }
+
+                        // Set the floor texture
+                        sector.floorTexture = parts[1];
+                        // Set the ceiling texture
+                        sector.ceilingTexture = parts[2];
+                        // Set the light level
+                        sector.lightLevel = Double.parseDouble(parts[3]);
+                        // Set the floor height
+                        sector.floorHeight = Double.parseDouble(parts[4]);
+                        // Set the ceiling height
+                        sector.ceilingHeight = Double.parseDouble(parts[5]);
+
+                        // Add the sector to the sectors list
+                        sectors.add(sector);
+                        break;
                 }
             }
         }
@@ -103,6 +139,12 @@ public class Level {
         for (int[] wall : tempWalls) {
             walls.add(new Wall(verts.get(wall[0]), verts.get(wall[1]), tempWallTex.get(i)));
             i++;
+        }
+
+        // Loop over each sector
+        for (Sector sector : sectors) {
+            // Load the sector from the level walls
+            sector.loadFromLevelWalls(walls);
         }
     }
 

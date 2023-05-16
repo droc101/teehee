@@ -3,7 +3,7 @@ import java.awt.Dimension;
 
 public class main {
 
-    final static int TargetFPS = 30;
+    final static int TargetFPS = 15;
 
     // Dict of key states
     enum KeyState {
@@ -179,7 +179,7 @@ public class main {
             }
 
             //FrameBuffer fb = new FrameBuffer(width, height);
-            FrameBuffer fb = new FrameBuffer(800, 600);
+            FrameBuffer fb = new FrameBuffer(640, 480);
 
             RayTracer rt = new RayTracer(currentLevel);
 
