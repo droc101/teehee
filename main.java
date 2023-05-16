@@ -187,7 +187,7 @@ public class main {
                 fb.drawFastVLine(x, 0, fb.height / 2, new Color(43, 36, 29));
                 fb.drawFastVLine(x, fb.height / 2, fb.height / 2, new Color(13, 6, 0));
 
-                rt.RenderCol(fb, playerPos, playerRot, x, fb.height);
+                rt.RenderCol(fb, playerPos, playerRot, x, fb.height, currentLevel.findSector(playerPos));
 
             }
 

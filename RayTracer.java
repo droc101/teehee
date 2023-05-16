@@ -12,11 +12,16 @@ public class RayTracer {
         this.level = level;
     }
 
-    public void RenderCol(FrameBuffer buffer, Vector2 fromPos, double fromRot, int col, int screenH) {
-        RenderCol(buffer, fromPos, fromRot, col, screenH, 0.0, 0);
+    public void RenderCol(FrameBuffer buffer, Vector2 fromPos, double fromRot, int col, int screenH, Sector s) {
+        RenderCol(buffer, fromPos, fromRot, col, screenH, 0.0, 0, s);
     }
 
-    public void RenderCol(FrameBuffer buffer, Vector2 FromPos, double FromRot, int col, int screenH, double inWallDist, int rc) {
+    public void RenderCol(FrameBuffer buffer, Vector2 FromPos, double FromRot, int col, int screenH, double inWallDist, int rc, Sector s) {
+
+        if (s == null) {
+            System.err.println("Sector is null! Defaulting to 0");
+            s = level.sectors.get(0); // Fall back to sector 0 if out of bounds or something
+        }
 
         // Get the angle of the column
         // FOV is 90 degrees
@@ -24,7 +29,7 @@ public class RayTracer {
 
         ArrayList<Wall> walls = new ArrayList<Wall>();
         // Copy level.walls to walls
-        for (Wall wall : level.GetAllWalls()) {
+        for (Wall wall : s.walls) {
             walls.add(wall);
         }
         // Loop over each entity
@@ -59,19 +64,42 @@ public class RayTracer {
             return;
         }
 
-        if (rc < 10) {
-            // Render the next wall only if the current wall is not close enough to the camera
-            if (closestDist > 1) {
-                // Render the next wall
-                RenderCol(buffer, FromPos, FromRot, col, screenH, closestDist, rc+1);
+        if (closestWall.isPortal) {
+            // Don't draw backside of portal
+            if (closestWall.portalSector == s) {
+                // Recursively call for the next wall
+                RenderCol(buffer, FromPos, FromRot, col, screenH, closestDist, rc + 1, closestWall.portalSector);
+                return;
             }
+
+
+            RenderCol(buffer, FromPos, FromRot, col, screenH, closestDist+1, rc + 1, closestWall.portalSector);
+            // Calculate the y position of portal sector's floor on the screen (remember, position is 2D)
+            // Get the distance from the ray origin to the intersection point
+            Vector2 intersection = ray.Intersection(closestWall);
+            double distance = Vector2.Distance(FromPos, intersection) * Math.cos(angle - FromRot);
+
+            // Get the height of the wall on screen
+            double height = screenH / distance;
+
+            // Get the y position of the wall
+            double y = (buffer.height - height) / 2;
+
+            // Offset the Y position based on the sector's floor height and the wall's distance
+            double y2 = y + (-closestWall.portalSector.floorHeight) * (screenH / distance);
+
+            // Offset the height based on the sector's ceiling height and the wall's distance
+            double height2 = height + (closestWall.portalSector.ceilingHeight - closestWall.portalSector.floorHeight) * (screenH / distance);
+
+            //buffer.drawFastVLine(col, (int) (y2+height2), (int) (((y2 + height2) - y) + height), new Color(0, 0, 255));
+            return;
         }
 
         // Find which sector the wall is in
         Sector sector = null;
-        for (Sector s : level.sectors) {
-            if (s.containsWall(closestWall)) {
-                sector = s;
+        for (Sector sr : level.sectors) {
+            if (sr.containsWall(closestWall)) {
+                sector = sr;
                 break;
             }
         }

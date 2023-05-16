@@ -21,7 +21,9 @@ public class Ray {
         Wall closestWall = null;
         double closestDist = Double.MAX_VALUE;
         for (Wall wall : level.GetAllWalls()) {
-            //System.out.println("rtgb");
+            if (wall.isPortal) {
+                continue; // Don't cast rays against portals
+            }
             Vector2 intersection = Intersection(wall);
             if (intersection != null) {
                 double distance = Vector2.Distance(origin, intersection);

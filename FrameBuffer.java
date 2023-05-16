@@ -46,6 +46,15 @@ public class FrameBuffer {
         }
     }
 
+    public void drawRectAbs(int x1, int y1, int x2, int y2, Color c) {
+        // Expects a rectangle
+        int x = Math.min(x1, x2);
+        int y = Math.min(y1, y2);
+        int w = Math.abs(x1 - x2);
+        int h = Math.abs(y1 - y2);
+        drawRect(x, y, w, h, c);
+    }
+
     public void draw(JFrame frame) {
         // Create a java.awt.image.BufferedImage from the framebuffer
         java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB);

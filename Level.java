@@ -114,6 +114,15 @@ public class Level {
 
     }
 
+    public Sector findSector(Vector2 pos) {
+        for (Sector sector : sectors) {
+            if (sector.containsPoint(pos)) {
+                return sector;
+            }
+        }
+        return null;
+    }
+
     public ArrayList<Wall> GetAllWalls() {
         ArrayList<Wall> walls = new ArrayList<Wall>();
         for (Sector sector : sectors) {
