@@ -3,6 +3,11 @@ public class Wall {
     public Vector2 vertB;
     public String texture;
 
+    public boolean isPortal = false;
+    public Sector portalSector = null;
+
+    public Integer loadTemp = -1;
+
     public Wall(Vector2 vertA, Vector2 vertB, String texture) {
         this.vertA = vertA;
         this.vertB = vertB;
@@ -13,6 +18,10 @@ public class Wall {
         this.vertA = vertA;
         this.vertB = vertB;
         this.texture = "default";
+    }
+
+    public Wall() {
+
     }
 
     public Vector2 getNormal() {
@@ -67,4 +76,7 @@ public class Wall {
     }
 
 
+    public boolean containsPoint(Vector2 vertB) {
+        return vertA.equals(vertB) || vertB.equals(vertB);
+    }
 }

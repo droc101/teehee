@@ -3,10 +3,6 @@ import java.io.FileNotFoundException; // Import this class to handle errors
 import java.util.*;
 
 public class Level {
-
-    public ArrayList<Vector2> verts = new ArrayList<Vector2>();
-    public ArrayList<Wall> walls = new ArrayList<Wall>();
-
     public ArrayList<Entity> entities = new ArrayList<Entity>();
 
     public ArrayList<Sector> sectors = new ArrayList<Sector>();
@@ -38,114 +34,94 @@ public class Level {
         }
 
         LoadMode mode = LoadMode.HEADER;
-        ArrayList<int[]> tempWalls = new ArrayList<>();
-        ArrayList<String> tempWallTex = new ArrayList<String>();
+        List<Vector2> verts = new ArrayList<Vector2>();
+        List<Wall> walls = new ArrayList<Wall>();
         // Loop over each line of the level
         for (String line : level) {
             if (line.charAt(0) == '#') {
                 continue;
-            }
-            // Check if the ine begins with "["
-            if (line.charAt(0) == '[') {
-                // Check if the line ends with "]"
-                if (line.charAt(line.length() - 1) == ']') {
-                    // Remove the brackets
-                    line = line.substring(1, line.length() - 1);
-
-                    // Set the load mode
-                    switch (line) {
-                        case "Level":
-                            mode = LoadMode.HEADER;
-                            break;
-                        case "Verts":
-                            mode = LoadMode.VERTS;
-                            break;
-                        case "Walls":
-                            mode = LoadMode.WALLS;
-                            break;
-                        case "Sectors":
-                            mode = LoadMode.SECTORS;
-                            break;
-                    }
+            } else if (line.charAt(0) == '[') {
+                // Get the mode from the line
+                String modeStr = line.substring(1, line.length() - 1);
+                switch (modeStr) {
+                    case "Level":
+                        mode = LoadMode.HEADER;
+                        break;
+                    case "Verts":
+                        mode = LoadMode.VERTS;
+                        break;
+                    case "Walls":
+                        mode = LoadMode.WALLS;
+                        break;
+                    case "Sectors":
+                        mode = LoadMode.SECTORS;
+                        break;
                 }
             } else {
+                // Split the line by commas
+                String[] parts = line.split(",");
                 switch (mode) {
                     case HEADER:
-                        // Split the line into two parts separated by =
-                        String[] parts = line.split("=");
-                        switch (parts[0]) {
-                            case "Name":
-                                name = parts[1];
-                                break;
-                            case "Spawn":
-                                // Split the line into two parts separated by ,
-                                String[] spawnParts = parts[1].split(",");
-                                // Create a new vector from the two parts
-                                spawn = new Vector2(Double.parseDouble(spawnParts[0]),
-                                        Double.parseDouble(spawnParts[1]));
-                                // Set the spawn rotation
-                                spawnRot = Double.parseDouble(spawnParts[2]);
-                                break;
-                        }
+                        // Get the name of the level
+                        name = parts[0];
+                        // Get the spawn position
+                        spawn = new Vector2(Double.parseDouble(parts[1]), Double.parseDouble(parts[2]));
+                        // Get the spawn rotation
+                        spawnRot = Double.parseDouble(parts[3]);
                         break;
                     case VERTS:
-                        // Split the line into two parts
-                        parts = line.split(",");
-                        // Create a new vector from the two parts
-                        Vector2 vert = new Vector2(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]));
-                        // Add the vector to the verts list
-                        verts.add(vert);
+                        // Add a new vertex to the level
+                        verts.add(new Vector2(Double.parseDouble(parts[0]), Double.parseDouble(parts[1])));
                         break;
                     case WALLS:
-                        // Split the line into two parts
-                        parts = line.split(",");
-                        // Add to tempWalls
-                        tempWalls.add(new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])});
-                        tempWallTex.add(parts[2]);
+                        // Add a new wall to the level
+                        Wall wall = new Wall();
+                        wall.vertA = verts.get(Integer.parseInt(parts[0]));
+                        wall.vertB = verts.get(Integer.parseInt(parts[1]));
+                        wall.texture = parts[2];
+                        if (parts.length > 3) {
+                            wall.isPortal = true;
+                            wall.loadTemp = Integer.parseInt(parts[3]);
+                        }
+                        walls.add(wall);
                         break;
                     case SECTORS:
-                        // Split the line into two parts
-                        parts = line.split(",");
-                        // Create a new sector
+                        // Add a new sector to the level
                         Sector sector = new Sector();
-                        // Split part 0 by semicolon
-                        String[] sectorWalls = parts[0].split(";");
-
-                        // Loop over each wall index and add it to the sector
-                        for (String wall : sectorWalls) {
-                            sector.wallIndices.add(Integer.parseInt(wall));
+                        // split the first part by semicolons
+                        String[] walll = parts[0].split(";");
+                        for (String wallStr : walll) {
+                            sector.walls.add(walls.get(Integer.parseInt(wallStr)));
                         }
-
-                        // Set the floor texture
                         sector.floorTexture = parts[1];
-                        // Set the ceiling texture
                         sector.ceilingTexture = parts[2];
-                        // Set the light level
                         sector.lightLevel = Double.parseDouble(parts[3]);
-                        // Set the floor height
                         sector.floorHeight = Double.parseDouble(parts[4]);
-                        // Set the ceiling height
                         sector.ceilingHeight = Double.parseDouble(parts[5]);
-
-                        // Add the sector to the sectors list
                         sectors.add(sector);
                         break;
                 }
             }
         }
-
-        // Convert tempWalls to walls
-        int i = 0;
-        for (int[] wall : tempWalls) {
-            walls.add(new Wall(verts.get(wall[0]), verts.get(wall[1]), tempWallTex.get(i)));
-            i++;
-        }
-
-        // Loop over each sector
+        // Now that all the walls have been loaded, we can set the portal sectors
         for (Sector sector : sectors) {
-            // Load the sector from the level walls
-            sector.loadFromLevelWalls(walls);
+            for (Wall wall : sector.walls) {
+                if (wall.isPortal) {
+                    wall.portalSector = sectors.get(wall.loadTemp);
+                }
+            }
         }
+
+    }
+
+    public ArrayList<Wall> GetAllWalls() {
+        ArrayList<Wall> walls = new ArrayList<Wall>();
+        for (Sector sector : sectors) {
+            for (Wall wall : sector.walls) {
+                walls.add(wall);
+            }
+        }
+        return walls;
     }
 
 }

@@ -3,7 +3,7 @@ import java.awt.Dimension;
 
 public class main {
 
-    final static int TargetFPS = 15;
+    final static int TargetFPS = 30;
 
     // Dict of key states
     enum KeyState {
@@ -20,7 +20,7 @@ public class main {
             e.printStackTrace();
         }
 
-        MessageBox("Controls:\nWS: move\nAD: Rotate\nQE: Strafe", "Controls");
+        //MessageBox("Controls:\nWS: move\nAD: Rotate\nQE: Strafe", "Controls");
 
         //1. Create the frame.
         JFrame frame = new JFrame("GAME AND");
@@ -33,8 +33,6 @@ public class main {
         frame.setBackground(java.awt.Color.BLACK);
         frame.setLocationRelativeTo(null);
         frame.setLocation(100,100);
-
-
         frame.pack();
         frame.setVisible(true);
         frame.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -124,6 +122,7 @@ public class main {
         double playerRot = Math.PI * 1.5;
         int playerHealth = 100;
         final int playerMaxHealth = 100;
+        FrameBuffer fb = new FrameBuffer(320, 240);
 
         // Event loop
         while (true) {
@@ -179,7 +178,7 @@ public class main {
             }
 
             //FrameBuffer fb = new FrameBuffer(width, height);
-            FrameBuffer fb = new FrameBuffer(640, 480);
+
 
             RayTracer rt = new RayTracer(currentLevel);
 

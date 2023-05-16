@@ -20,7 +20,7 @@ public class Ray {
     public double Cast(Level level) {
         Wall closestWall = null;
         double closestDist = Double.MAX_VALUE;
-        for (Wall wall : level.walls) {
+        for (Wall wall : level.GetAllWalls()) {
             //System.out.println("rtgb");
             Vector2 intersection = Intersection(wall);
             if (intersection != null) {

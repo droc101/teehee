@@ -24,7 +24,7 @@ public class RayTracer {
 
         ArrayList<Wall> walls = new ArrayList<Wall>();
         // Copy level.walls to walls
-        for (Wall wall : level.walls) {
+        for (Wall wall : level.GetAllWalls()) {
             walls.add(wall);
         }
         // Loop over each entity
@@ -160,6 +160,10 @@ public class RayTracer {
 
         // Draw the wall using its texture and shade
         for (int i = 0; i < height; i++) {
+            if (closestWall.isPortal) {
+                buffer.setPixel(col, (int) y + i, color);
+                continue;
+            }
             // Check if the Y pixel is on screen
             if (y + i < 0 || y + i >= buffer.height) continue;
             // Get the y position of the texture
@@ -171,15 +175,15 @@ public class RayTracer {
             int texR = (texColor >> 16) & 0xFF;
             int texG = (texColor >> 8) & 0xFF;
             int texB = (texColor >> 0) & 0xFF;
-            int texA = (texColor >> 24) & 0xFF;
             // Calculate the color of the pixel on the wall
             r = (int) (texR * shade);
             g = (int) (texG * shade);
             b = (int) (texB * shade);
-            color = new Color(r, g, b, texA);
+            color = new Color(r, g, b);
 
             // Draw the pixel
             buffer.setPixel(col, (int) y + i, color);
         }
+
     }
 }
