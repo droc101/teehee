@@ -46,4 +46,5 @@ public class Color {
                ((g & 0xFF) << 8) |
                ((b & 0xFF) << 0);
     }
+
 }

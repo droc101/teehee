@@ -31,6 +31,7 @@ public class Level {
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
+            main.MessageBox("Level File Not Found!");
         }
 
         LoadMode mode = LoadMode.HEADER;

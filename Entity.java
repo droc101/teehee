@@ -14,8 +14,18 @@ public class Entity {
         this.rotation = rotation;
     }
 
-    public void update() {
+    public void update(Vector2 playerPos) {
 
+    }
+
+    public boolean isColliding(Vector2 pos) {
+        // Calculate the distance between the entity and the point
+        double dist = Vector2.Distance(position, pos);
+        // Check if the distance is less than the length of the entity
+        if (dist < length) {
+            return true;
+        }
+        return false;
     }
 
     public Wall makeWall() {

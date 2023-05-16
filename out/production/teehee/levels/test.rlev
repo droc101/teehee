@@ -12,10 +12,10 @@ Spawn=0,0,0
 -1,1
 [Walls]
 0,1,BLOB2
-1,2,null
+1,2,BLOB2
 2,3,BLOB2
-3,0,null
+3,0,BLOB2
 4,5,ICON
 5,6,BLOB2
-6,7,null
-7,4,null
+6,7,ICON
+7,4,BLOB2

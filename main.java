@@ -3,7 +3,7 @@ import java.awt.Dimension;
 
 public class main {
 
-    final static int TargetFPS = 15;
+    final static int TargetFPS = 30;
 
     // Dict of key states
     enum KeyState {
@@ -27,13 +27,14 @@ public class main {
 
         frame.setIconImage(new ImageIcon("texture/ICON.png").getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        frame.setLocationRelativeTo(null);
         frame.setAlwaysOnTop(true);
-        //frame.setResizable(false);
+        frame.setResizable(false);
+        //frame.setUndecorated(true);
         frame.setBackground(java.awt.Color.BLACK);
+        frame.setLocationRelativeTo(null);
+        frame.setLocation(100,100);
 
-        frame.setPreferredSize(new Dimension(800, 600));
+
         frame.pack();
         frame.setVisible(true);
         frame.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -121,6 +122,8 @@ public class main {
 
         Vector2 playerPos = new Vector2(2.5, 2.5);
         double playerRot = Math.PI * 1.5;
+        int playerHealth = 100;
+        final int playerMaxHealth = 100;
 
         // Event loop
         while (true) {
@@ -170,24 +173,33 @@ public class main {
                 playerPos = OldPos;
             }
 
+            // Update entities
+            for (Entity e : currentLevel.entities) {
+                e.update(playerPos);
+            }
+
             //FrameBuffer fb = new FrameBuffer(width, height);
             FrameBuffer fb = new FrameBuffer(800, 600);
-
-            // Fill the top half of the screen with blue
-            //fb.drawRect(0, 0, width, height / 2, new Color(0x0000FF));
-
-            // Fill the bottom half of the screen with green
 
             RayTracer rt = new RayTracer(currentLevel);
 
             for (int x = 0; x < fb.width; x++) {
                 // Fill the top half of the screen with blue
-                fb.drawFastVLine(x, 0, fb.height / 2, new Color(0, 0, 255));
-                fb.drawFastVLine(x, fb.height / 2, fb.height / 2, new Color(0, 255, 0));
+                fb.drawFastVLine(x, 0, fb.height / 2, new Color(43, 36, 29));
+                fb.drawFastVLine(x, fb.height / 2, fb.height / 2, new Color(13, 6, 0));
 
                 rt.RenderCol(fb, playerPos, playerRot, x, fb.height);
 
             }
+
+            // Draw the player health bar in the top left corner
+            // Calculate the width of the health bar
+            int barWidth = (int) (((double) playerHealth / playerMaxHealth) * 200);
+
+            // Draw the black background of the health bar
+            fb.drawRect(10, 10, 200, 10, new Color(0,0,0));
+            // Draw the red foreground of the health bar
+            fb.drawRect(10, 10, barWidth, 10, new Color(255,0,0));
 
             fb.draw(frame);
 
@@ -200,12 +212,6 @@ public class main {
             // Check if the frame took too long to render
             if (frameTime > 1000 / TargetFPS) {
                 System.out.println("Frame took too long to render: " + frameTime + "ms");
-                // Wait for the next frame
-                try {
-                    Thread.sleep(Math.max(0, (1000 / TargetFPS) - frameTime));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
 
             // Wait for the next frame
