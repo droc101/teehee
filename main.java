@@ -1,5 +1,4 @@
 import javax.swing.*;
-import java.awt.Dimension;
 
 public class main {
 
@@ -199,6 +198,12 @@ public class main {
             fb.drawRect(10, 10, 200, 10, new Color(0,0,0));
             // Draw the red foreground of the health bar
             fb.drawRect(10, 10, barWidth, 10, new Color(255,0,0));
+
+            //fb.BlitSprite("demon", new Vector2(10,10));
+            //fb.BlitSprite("ergbf", new Vector2(10, 100));
+
+            Util.DrawInt(fb, new Vector2(10, 50), playerHealth);
+
 
             fb.draw(frame);
 

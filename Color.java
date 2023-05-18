@@ -36,9 +36,9 @@ public class Color {
     public Color(int argb) {
         this.r = (byte) ((argb >> 16) & 0xFF);
         this.g = (byte) ((argb >> 8) & 0xFF);
-        this.b = (byte) ((argb >> 0) & 0xFF);
-        this.a = (byte) ((argb >> 24) & 0xFF);
+        this.b = (byte) (argb & 0xFF);
     }
+
 
     public int getARGB() {
         return ((a & 0xFF) << 24) |

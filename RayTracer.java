@@ -18,6 +18,21 @@ public class RayTracer {
 
     public void RenderCol(FrameBuffer buffer, Vector2 FromPos, double FromRot, int col, int screenH, double inWallDist, int rc, Sector s) {
 
+        double[] fromPos = {FromPos.x, FromPos.y};
+        int[] ocol = Native.render_col(fromPos, FromRot, col, screenH, inWallDist, rc, s);
+        // Draw the column
+        for (int i = 0; i < ocol.length; i++) {
+            // Split the color into RGB
+            int r = (ocol[i] >> 16) & 0xFF;
+            int g = (ocol[i] >> 8) & 0xFF;
+            int b = (ocol[i] >> 0) & 0xFF;
+            // Draw the pixel
+            buffer.setPixel(col, i, new Color(r, g, b));
+        }
+        if (1 == 1) {
+            return;
+        }
+
         if (s == null) {
             //System.err.println("Sector is null! Defaulting to 0");
             s = level.sectors.get(0); // Fall back to sector 0 if out of bounds or something
@@ -246,9 +261,9 @@ public class RayTracer {
 
 
         // Get the floor color (placeholder lime green)
-        r = 0;
-        g = 255;
-        b = 0;
+        r = 200;
+        g = 200;
+        b = 200;
 
         // Calculate the floor color
         color = new Color(r, g, b);
@@ -265,7 +280,7 @@ public class RayTracer {
 
         // Draw the floor (lime green)
         //buffer.drawFastVLine(col, (int) (y + height), (int) (buffer.height - (y + height)), new Color(0, 255, 0));
-        buffer.drawFastVLine(col, 0, (int) y, new Color(255, 0, 0));
+        buffer.drawFastVLine(col, 0, (int) y, new Color(180, 180, 180));
 
     }
 }

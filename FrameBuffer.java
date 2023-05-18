@@ -1,4 +1,8 @@
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class FrameBuffer {
     public int width;
@@ -104,6 +108,71 @@ public class FrameBuffer {
             int charY = charIndex / 16;
             drawRect(x, y, 8, 8, color);
             x += 8;
+        }
+    }
+
+    public void BlitSpriteRect(String name, Vector2 screenPos, Vector2 texturePos, Vector2 textureSize) {
+        String wallTex = "texture/" + name + ".png";
+        // Load the texture using ImageIO
+        BufferedImage tex = null;
+        try {
+            tex = ImageIO.read(new File(wallTex));
+        } catch (IOException e) {
+            // Load texture/missing.png instead
+            try {
+                tex = ImageIO.read(new File("texture/missing.png"));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        // Blit the texture to the framebuffer
+        for(int i = 0; i < textureSize.x; i++) {
+            for(int j = 0; j < textureSize.y; j++) {
+                // Ensure the pixel is in bounds using Util.wrap
+                int px_x = (int)Util.wrap(texturePos.x + i, 0, tex.getWidth());
+                int px_y = (int)Util.wrap(texturePos.y + j, 0, tex.getHeight());
+                int pixel = tex.getRGB(px_x, px_y);
+                int r = (pixel >> 16) & 0xFF;
+                int g = (pixel >> 8) & 0xFF;
+                int b = (pixel >> 0) & 0xFF;
+                int a = (pixel >> 24) & 0xFF;
+                if(a == 0) {
+                    continue;
+                }
+                setPixel((int)screenPos.x + i, (int)screenPos.y + j, new Color(r, g, b));
+            }
+        }
+    }
+
+    public void BlitSprite(String name, Vector2 pos) {
+        String wallTex = "texture/" + name + ".png";
+        // Load the texture using ImageIO
+        BufferedImage tex = null;
+        try {
+            tex = ImageIO.read(new File(wallTex));
+        } catch (IOException e) {
+            // Load texture/missing.png instead
+            try {
+                tex = ImageIO.read(new File("texture/missing.png"));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        // Blit the texture to the framebuffer
+        for(int i = 0; i < tex.getWidth(); i++) {
+            for(int j = 0; j < tex.getHeight(); j++) {
+                int pixel = tex.getRGB(i, j);
+                int r = (pixel >> 16) & 0xFF;
+                int g = (pixel >> 8) & 0xFF;
+                int b = (pixel >> 0) & 0xFF;
+                int a = (pixel >> 24) & 0xFF;
+                if(a == 0) {
+                    continue;
+                }
+                setPixel((int)pos.x + i, (int)pos.y + j, new Color(r, g, b));
+            }
         }
     }
 

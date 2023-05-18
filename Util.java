@@ -17,6 +17,25 @@ public class Util {
         return output;
     }
 
+    public static void DrawInt(FrameBuffer fb, Vector2 pos, int value) {
+        // Convert the value to a string
+        String str = Integer.toString(value);
+        int xpos = (int) pos.x;
+        for (int i = 0; i < str.length(); i++) {
+            // Get the character at the current index
+            char c = str.charAt(i);
+
+            // Get the index of the character in the font
+            int charIndex = (int)c - '0';
+
+            // Calculate the x and y position of the character in the font
+            fb.BlitSpriteRect("fon/numbers", new Vector2(xpos, pos.y), new Vector2(charIndex * 16, 0), new Vector2(16, 32));
+
+            // Increment the x position
+            xpos += 16;
+        }
+    }
+
     public static double wrap(double value, double minValue, double maxValue) {
         if (value < minValue) {
             double range = maxValue - minValue;
@@ -29,19 +48,15 @@ public class Util {
     }
 
     public static void LoadLibNative() {
-        // Check if this is an NT or linux system
         String os = System.getProperty("os.name");
         if (os.startsWith("Windows")) {
             main.MessageBox("yeah so you cant run this on windows, go get linux", "Error");
             System.exit(1);
         } else if (os.startsWith("Linux")) {
-            // Check if the system is 32 or 64 bit
             String arch = System.getProperty("os.arch");
             if (arch.equals("amd64")) {
-                // 64 bit
                 System.out.println("64 bit Linux detected");
             } else {
-                // 32 bit
                 main.MessageBox("this only runs on 64 bit systems, go get something modern", "Error");
                 System.exit(1);
             }
@@ -50,8 +65,6 @@ public class Util {
             main.MessageBox("yeah so you cant run this on *unknown os*, go get linux", "Error");
             System.exit(1);
         }
-        // Library is located in /native
-        // Update the path to the library here
         String path = System.getProperty("user.dir") + "/native/libnative.so";
         try {
             System.out.println("Loading native library from: " + path);
@@ -59,7 +72,7 @@ public class Util {
         } catch (Exception e) {
             System.out.println("Failed to load native library from: " + path);
             main.MessageBox("Failed to load native library from: " + path, "Error");
-System.exit(1);
+            System.exit(1);
         }
     }
     
