@@ -62,7 +62,5 @@ public class Util {
 System.exit(1);
         }
     }
-
-    public static native void test();
     
 }
