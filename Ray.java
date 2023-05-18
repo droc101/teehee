@@ -44,25 +44,16 @@ public class Ray {
         if (intersections.containsKey(wall)) {
             return intersections.get(wall);
         }
-        Vector2 wallVector = new Vector2(wall.vertB.x - wall.vertA.x, wall.vertB.y - wall.vertA.y);
-        Vector2 rayVector = new Vector2(Math.cos(direction), Math.sin(direction));
 
-        double denominator = (rayVector.x * wallVector.y) - (rayVector.y * wallVector.x);
-        if (denominator == 0) {
-            return null; // Rays are parallel, no intersection
+        double[] result = Native.RayCast(wall.vertA.x, wall.vertA.y, wall.vertB.x, wall.vertB.y, origin.x, origin.y, direction);
+        // Check the length of the result array
+        if (result.length == 0) {
+            return null; // No intersection
         }
 
-        double t = ((wall.vertA.x - origin.x) * wallVector.y - (wall.vertA.y - origin.y) * wallVector.x) / denominator;
-        double u = ((wall.vertA.x - origin.x) * rayVector.y - (wall.vertA.y - origin.y) * rayVector.x) / denominator;
-
-        if (t >= 0 && u >= 0 && u <= 1) {
-            double intersectionX = origin.x + t * rayVector.x;
-            double intersectionY = origin.y + t * rayVector.y;
-            Vector2 intersection = new Vector2(intersectionX, intersectionY);
-            intersections.put(wall, intersection);
-            return intersection;
-        }
-
-        return null; // No intersection
+        // Convert the result array to a Vector2
+        Vector2 intersection = new Vector2(result[0], result[1]);
+        intersections.put(wall, intersection);
+        return intersection;
     }
 }

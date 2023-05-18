@@ -19,7 +19,7 @@ public class RayTracer {
     public void RenderCol(FrameBuffer buffer, Vector2 FromPos, double FromRot, int col, int screenH, double inWallDist, int rc, Sector s) {
 
         if (s == null) {
-            System.err.println("Sector is null! Defaulting to 0");
+            //System.err.println("Sector is null! Defaulting to 0");
             s = level.sectors.get(0); // Fall back to sector 0 if out of bounds or something
         }
 
@@ -73,7 +73,7 @@ public class RayTracer {
             }
 
 
-            RenderCol(buffer, FromPos, FromRot, col, screenH, closestDist+1, rc + 1, closestWall.portalSector);
+            RenderCol(buffer, FromPos, FromRot, col, screenH, closestDist, rc + 1, closestWall.portalSector);
             // Calculate the y position of portal sector's floor on the screen (remember, position is 2D)
             // Get the distance from the ray origin to the intersection point
             Vector2 intersection = ray.Intersection(closestWall);
@@ -85,13 +85,33 @@ public class RayTracer {
             // Get the y position of the wall
             double y = (buffer.height - height) / 2;
 
-            // Offset the Y position based on the sector's floor height and the wall's distance
-            double y2 = y + (-closestWall.portalSector.floorHeight) * (screenH / distance);
+
+           double height2 = y + (closestWall.portalSector.floorHeight) * (screenH / distance);
 
             // Offset the height based on the sector's ceiling height and the wall's distance
-            double height2 = height + (closestWall.portalSector.ceilingHeight - closestWall.portalSector.floorHeight) * (screenH / distance);
+            double y2 = y - (closestWall.portalSector.ceilingHeight) * (screenH / distance);
+            // Offset the Y position based on the sector's floor height and the wall's distance
+            //double y2 = y + (-closestWall.portalSector.floorHeight) * (screenH / distance);
 
-            //buffer.drawFastVLine(col, (int) (y2+height2), (int) (((y2 + height2) - y) + height), new Color(0, 0, 255));
+            // Offset the height based on the sector's ceiling height and the wall's distance
+            //double height2 = height + (closestWall.portalSector.ceilingHeight - closestWall.portalSector.floorHeight) * (screenH / distance);
+
+            double height3 = height + (s.floorHeight) * (screenH / distance);
+
+            // Offset the height based on the sector's ceiling height and the wall's distance
+            double y3 = y - (s.ceilingHeight) * (screenH / distance);
+
+
+            // Calculate the length of the wall below the portal (y+height - y2)
+
+
+            buffer.drawFastVLine(col, (int) (y2+height2), (int) (y3 + height3 - y2), new Color(0, 0, 255));
+            // Draw the floor of the sector (lime green) from the bottom of the portal to the bottom of the screen
+            buffer.drawFastVLine(col, (int) (y2+height2+(y3+height3-y2)), (int) (buffer.height - (y2+height2)), new Color(0, 255, 0));
+
+            // Draw a red line from Y=0 to Y
+            buffer.drawFastVLine(col, 0, (int) y3, new Color(255, 0, 0));
+
             return;
         }
 
@@ -140,6 +160,7 @@ public class RayTracer {
         double localX = Vector2.Distance(closestWall.vertA, intersection);
 
         double texCol = localX / wallLength * texW;
+
         texCol *= (wallLength / ((sector.ceilingHeight - sector.floorHeight)*2));
         texCol %= texW;
 
@@ -157,11 +178,17 @@ public class RayTracer {
         // Calcuate the shade of the wall based on the camera angle and wall normal
         double shade = Math.abs(Math.cos((FromRot + (1.5 * Math.PI)) - closestWall.getAngle()));
 
+        // Light should be affected by distance but not by a factor of more than half
+        shade = shade * (1 - (distance / (buffer.width / 2)));
+
         // Multiply by the sector's light level
         shade *= sector.lightLevel;
 
         // Make sure the shade is between 40 and 255
         shade = Math.max(0.4, Math.min(1, shade));
+
+        // Apply fake banding to the shade
+        shade = Math.floor(shade * 16) / 16;
 
 
         // Calculate the color of the wall
@@ -173,11 +200,10 @@ public class RayTracer {
         // Backup the original y position and height
         double origY = y;
         double origHeight = height;
-        // Offset the Y position based on the sector's floor height and the wall's distance
-        y += (-sector.floorHeight) * (screenH / distance);
-
+        // Offset the Y position based on the sector's floor and ceiling height, and the wall's distance
+        //y += (-sector.floorHeight) * (screenH / distance);
         // Offset the height based on the sector's ceiling height and the wall's distance
-        height += (sector.ceilingHeight - sector.floorHeight) * (screenH / distance);
+        //height += (sector.ceilingHeight - sector.floorHeight) * (screenH / distance);
 
         // Fill the original y position and height with the floor color
         for (int i = 0; i < origHeight; i++) {
@@ -196,6 +222,11 @@ public class RayTracer {
             if (y + i < 0 || y + i >= buffer.height) continue;
             // Get the y position of the texture
             int texY = (int) (i / height * texH);
+
+            // Make sure the texture Y position is between 0 and the texture height
+            texY = (int) Util.wrap(texY, 0, texH - 1);
+            texCol = (int)Util.wrap(texCol, 0, texW - 1);
+
             // Get the color of the pixel in the texture
             //System.out.println(texCol + " " + texY);
             int texColor = tex.getRGB((int) texCol, texY);
@@ -212,6 +243,29 @@ public class RayTracer {
             // Draw the pixel
             buffer.setPixel(col, (int) y + i, color);
         }
+
+
+        // Get the floor color (placeholder lime green)
+        r = 0;
+        g = 255;
+        b = 0;
+
+        // Calculate the floor color
+        color = new Color(r, g, b);
+
+        // Draw the floor
+        for (int i = 0; i < buffer.height - (y + height); i++) {
+
+            // Check if the Y pixel is on screen
+            if (y + height + i < 0 || y + height + i >= buffer.height) continue;
+            // Draw the pixel
+            buffer.setPixel(col, (int) (y + height + i), color);
+        }
+
+
+        // Draw the floor (lime green)
+        //buffer.drawFastVLine(col, (int) (y + height), (int) (buffer.height - (y + height)), new Color(0, 255, 0));
+        buffer.drawFastVLine(col, 0, (int) y, new Color(255, 0, 0));
 
     }
 }

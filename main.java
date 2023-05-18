@@ -20,9 +20,9 @@ public class main {
             e.printStackTrace();
         }
 
-        //MessageBox("Controls:\nWS: move\nAD: Rotate\nQE: Strafe", "Controls");
+        // Load the native helper library
+        Util.LoadLibNative();
 
-        //1. Create the frame.
         JFrame frame = new JFrame("GAME AND");
 
         frame.setIconImage(new ImageIcon("texture/ICON.png").getImage());
@@ -122,7 +122,7 @@ public class main {
         double playerRot = Math.PI * 1.5;
         int playerHealth = 100;
         final int playerMaxHealth = 100;
-        FrameBuffer fb = new FrameBuffer(320, 240);
+        FrameBuffer fb = new FrameBuffer(320, 480);
 
         // Event loop
         while (true) {
@@ -184,8 +184,8 @@ public class main {
 
             for (int x = 0; x < fb.width; x++) {
                 // Fill the top half of the screen with blue
-                fb.drawFastVLine(x, 0, fb.height / 2, new Color(43, 36, 29));
-                fb.drawFastVLine(x, fb.height / 2, fb.height / 2, new Color(13, 6, 0));
+                //fb.drawFastVLine(x, 0, fb.height / 2, new Color(43, 36, 29));
+                //fb.drawFastVLine(x, fb.height / 2, fb.height / 2, new Color(13, 6, 0));
 
                 rt.RenderCol(fb, playerPos, playerRot, x, fb.height, currentLevel.findSector(playerPos));
 
