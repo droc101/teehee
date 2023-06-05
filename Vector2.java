@@ -1,4 +1,7 @@
 public class Vector2 {
+
+    // 2D position class
+
     public double x;
     public double y;
 
@@ -28,7 +31,7 @@ public class Vector2 {
     }
 
     public String toString() {
-        return "(" + x + ", " + y + ")";
+        return "X " + ((int) x) + " Y " + ((int)y);
     }
 
     public Vector2 clone() {

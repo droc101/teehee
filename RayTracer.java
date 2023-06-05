@@ -6,10 +6,17 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 public class RayTracer {
+
+    // Renders the scene using raycasting
+
+    double[] depth_buffer;
+
+
     Level level;
 
-    public RayTracer(Level level) {
+    public RayTracer(Level level, int width) {
         this.level = level;
+        depth_buffer = new double[width];
     }
 
     public void RenderCol(FrameBuffer buffer, Vector2 fromPos, double fromRot, int col, int screenH, Sector s) {
@@ -18,46 +25,17 @@ public class RayTracer {
 
     public void RenderCol(FrameBuffer buffer, Vector2 FromPos, double FromRot, int col, int screenH, double inWallDist, int rc, Sector s) {
 
-        double[] fromPos = {FromPos.x, FromPos.y};
-        int[] ocol = Native.render_col(fromPos, FromRot, col, screenH, inWallDist, rc, s);
-        // Draw the column
-        for (int i = 0; i < ocol.length; i++) {
-            // Split the color into RGB
-            int r = (ocol[i] >> 16) & 0xFF;
-            int g = (ocol[i] >> 8) & 0xFF;
-            int b = (ocol[i] >> 0) & 0xFF;
-            // Draw the pixel
-            buffer.setPixel(col, i, new Color(r, g, b));
-        }
-        if (1 == 1) {
-            return;
-        }
-
         if (s == null) {
-            //System.err.println("Sector is null! Defaulting to 0");
             s = level.sectors.get(0); // Fall back to sector 0 if out of bounds or something
         }
-
-        // Get the angle of the column
-        // FOV is 90 degrees
         double angle = Math.atan2(col - buffer.width / 2, buffer.width / 2) + FromRot;
 
         ArrayList<Wall> walls = new ArrayList<Wall>();
-        // Copy level.walls to walls
         for (Wall wall : s.walls) {
             walls.add(wall);
         }
-        // Loop over each entity
-        for (Entity entity : level.entities) {
-            // Check if the entity is a wall
-            walls.add(entity.makeWall());
-        }
 
-        // Create a ray
         Ray ray = new Ray(FromPos, angle);
-        // Loop over each wall until a wall is hit
-
-        // Look over each wall and get the closest one (accounting for the minimum distance)
         Wall closestWall = null;
         double closestDist = Double.MAX_VALUE;
         for (Wall wall : walls) {
@@ -79,70 +57,145 @@ public class RayTracer {
             return;
         }
 
-        if (closestWall.isPortal) {
-            // Don't draw backside of portal
-            if (closestWall.portalSector == s) {
-                // Recursively call for the next wall
-                RenderCol(buffer, FromPos, FromRot, col, screenH, closestDist, rc + 1, closestWall.portalSector);
-                return;
+        // Get the wall's texture
+        String wallTex = "texture/" + closestWall.texture + ".png";
+        // Load the texture using ImageIO
+        BufferedImage tex = null;
+        try {
+            tex = ImageIO.read(new File(wallTex));
+        } catch (IOException e) {
+            // Load texture/missing.png instead
+            try {
+                tex = ImageIO.read(new File("texture/missing.png"));
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
+        }
+
+        // Get the height of the texture
+        int texH = tex.getHeight();
+        // Get the width of the texture
+        int texW = tex.getWidth();
+
+        // Get the intersection point
+        Vector2 intersection = ray.Intersection(closestWall);
+
+        // Add this column to the depth buffer
+        depth_buffer[col] = closestDist;
+
+        // Get the length of the wall
+        double wallLength = Vector2.Distance(closestWall.vertA, closestWall.vertB);
+
+        // Get the local x position of the intersection point
+        double localX = Vector2.Distance(closestWall.vertA, intersection);
+
+        double texCol = localX / wallLength * texW;
+
+        texCol *= (wallLength / 2);
+        texCol %= texW;
+
+        // Get the distance from the ray origin to the intersection point
+        double distance = Vector2.Distance(FromPos, intersection) * Math.cos(angle - FromRot);
+
+        // Get the height of the wall on screen
+        double height = screenH / distance;
+
+        // Get the y position of the wall
+        double y = (screenH - height) / 2;
+
+        // Calcuate the shade of the wall based on the camera angle and wall normal
+        double shade = Math.abs(Math.cos((FromRot + (1.5 * Math.PI)) - closestWall.getAngle()));
+
+        // Light should be affected by distance but not by a factor of more than half
+        shade = shade * (1 - (distance / (buffer.width / 2)));
+
+        // Make sure the shade is between 40 and 255
+        shade = Math.max(0.4, Math.min(1, shade));
+
+        // Apply fake banding to the shade
+        shade = Math.floor(shade * 16) / 16;
 
 
-            RenderCol(buffer, FromPos, FromRot, col, screenH, closestDist, rc + 1, closestWall.portalSector);
-            // Calculate the y position of portal sector's floor on the screen (remember, position is 2D)
-            // Get the distance from the ray origin to the intersection point
-            Vector2 intersection = ray.Intersection(closestWall);
-            double distance = Vector2.Distance(FromPos, intersection) * Math.cos(angle - FromRot);
+        // Calculate the color of the wall
+        int r = (int) (255 * shade);
+        int g = (int) (255 * shade);
+        int b = (int) (255 * shade);
+        Color color = new Color(r, g, b);
 
-            // Get the height of the wall on screen
-            double height = screenH / distance;
+        // Draw the wall using its texture and shade
+        for (int i = 0; i < height; i++) {
+            // Check if the Y pixel is on screen
+            if (y + i < 0 || y + i >= screenH) continue;
+            // Get the y position of the texture
+            int texY = (int) (i / height * texH);
 
-            // Get the y position of the wall
-            double y = (buffer.height - height) / 2;
+            // Make sure the texture Y position is between 0 and the texture height
+            texY = (int) Util.wrap(texY, 0, texH - 1);
+            texCol = (int)Util.wrap(texCol, 0, texW - 1);
 
+            // Get the color of the pixel in the texture
+            //System.out.println(texCol + " " + texY);
+            int texColor = tex.getRGB((int) texCol, texY);
+            // Get the color of the pixel in the texture
+            int texR = (texColor >> 16) & 0xFF;
+            int texG = (texColor >> 8) & 0xFF;
+            int texB = (texColor >> 0) & 0xFF;
+            // Calculate the color of the pixel on the wall
+            r = (int) (texR * shade);
+            g = (int) (texG * shade);
+            b = (int) (texB * shade);
+            color = new Color(r, g, b);
 
-           double height2 = y + (closestWall.portalSector.floorHeight) * (screenH / distance);
+            // Draw the pixel
+            buffer.setPixel(col, (int) y + i, color);
+        }
 
-            // Offset the height based on the sector's ceiling height and the wall's distance
-            double y2 = y - (closestWall.portalSector.ceilingHeight) * (screenH / distance);
-            // Offset the Y position based on the sector's floor height and the wall's distance
-            //double y2 = y + (-closestWall.portalSector.floorHeight) * (screenH / distance);
+        // Draw the floor
+        buffer.drawFastVLine(col, (int) (y + height), (int) (screenH - (y + height)), new Color(200, 200, 200));
+        buffer.drawFastVLine(col, 0, (int) y, new Color(180, 180, 180));
 
-            // Offset the height based on the sector's ceiling height and the wall's distance
-            //double height2 = height + (closestWall.portalSector.ceilingHeight - closestWall.portalSector.floorHeight) * (screenH / distance);
+        // Convert the depth to a grayscale color
+        int depthColor = (int) (255 * (closestDist / (buffer.width / 2)));
+        // Make sure the depth color is between 0 and 255
+        depthColor = (int) Util.wrap(depthColor, 0, 255);
+        // Set the top 20 pixels to the depth color
+        //buffer.drawFastVLine(col, 0, 20, new Color(depthColor, depthColor, depthColor));
 
-            double height3 = height + (s.floorHeight) * (screenH / distance);
+    }
 
-            // Offset the height based on the sector's ceiling height and the wall's distance
-            double y3 = y - (s.ceilingHeight) * (screenH / distance);
+    public void RenderColPass2(FrameBuffer buffer, Vector2 FromPos, double FromRot, int col, int screenH) {
+        double angle = Math.atan2(col - buffer.width / 2, buffer.width / 2) + FromRot;
 
+        ArrayList<Wall> walls = new ArrayList<Wall>();
 
-            // Calculate the length of the wall below the portal (y+height - y2)
+        for (Entity entity : level.entities) {
+            walls.add(entity.makeWall());
+        }
 
+        Ray ray = new Ray(FromPos, angle);
+        Wall closestWall = null;
+        double closestDist = Double.MAX_VALUE;
+        for (Wall wall : walls) {
+            // Check if the ray intersects the wall
+            if (ray.Intersects(wall)) {
+                // Get the distance to the wall
+                double dist = Vector2.Distance(FromPos, ray.Intersection(wall));
+                if (dist < closestDist) {
+                    // Set the closest wall to the current wall
+                    closestWall = wall;
+                    // Set the closest distance to the current distance
+                    closestDist = dist;
+                }
+            }
+        }
 
-            buffer.drawFastVLine(col, (int) (y2+height2), (int) (y3 + height3 - y2), new Color(0, 0, 255));
-            // Draw the floor of the sector (lime green) from the bottom of the portal to the bottom of the screen
-            buffer.drawFastVLine(col, (int) (y2+height2+(y3+height3-y2)), (int) (buffer.height - (y2+height2)), new Color(0, 255, 0));
-
-            // Draw a red line from Y=0 to Y
-            buffer.drawFastVLine(col, 0, (int) y3, new Color(255, 0, 0));
-
+        if (closestWall == null) {
             return;
         }
 
-        // Find which sector the wall is in
-        Sector sector = null;
-        for (Sector sr : level.sectors) {
-            if (sr.containsWall(closestWall)) {
-                sector = sr;
-                break;
-            }
-        }
-
-        if (sector == null) {
-            Sector fakeSector = new Sector();
-            fakeSector.walls.add(closestWall);
-            sector = fakeSector;
+        // Check the depth buffer
+        if (depth_buffer[col] < closestDist) {
+            return;
         }
 
         // Get the wall's texture
@@ -176,10 +229,8 @@ public class RayTracer {
 
         double texCol = localX / wallLength * texW;
 
-        texCol *= (wallLength / ((sector.ceilingHeight - sector.floorHeight)*2));
+        texCol *= (wallLength / 2);
         texCol %= texW;
-
-        // texCol = 0;
 
         // Get the distance from the ray origin to the intersection point
         double distance = Vector2.Distance(FromPos, intersection) * Math.cos(angle - FromRot);
@@ -188,16 +239,13 @@ public class RayTracer {
         double height = screenH / distance;
 
         // Get the y position of the wall
-        double y = (buffer.height - height) / 2;
+        double y = (screenH - height) / 2;
 
         // Calcuate the shade of the wall based on the camera angle and wall normal
         double shade = Math.abs(Math.cos((FromRot + (1.5 * Math.PI)) - closestWall.getAngle()));
 
         // Light should be affected by distance but not by a factor of more than half
         shade = shade * (1 - (distance / (buffer.width / 2)));
-
-        // Multiply by the sector's light level
-        shade *= sector.lightLevel;
 
         // Make sure the shade is between 40 and 255
         shade = Math.max(0.4, Math.min(1, shade));
@@ -212,29 +260,11 @@ public class RayTracer {
         int b = (int) (255 * shade);
         Color color = new Color(r, g, b);
 
-        // Backup the original y position and height
-        double origY = y;
-        double origHeight = height;
-        // Offset the Y position based on the sector's floor and ceiling height, and the wall's distance
-        //y += (-sector.floorHeight) * (screenH / distance);
-        // Offset the height based on the sector's ceiling height and the wall's distance
-        //height += (sector.ceilingHeight - sector.floorHeight) * (screenH / distance);
-
-        // Fill the original y position and height with the floor color
-        for (int i = 0; i < origHeight; i++) {
-            // Check if the Y pixel is on screen
-            if (origY + i < 0 || origY + i >= buffer.height) continue;
-            buffer.setPixel(col, (int) (origY + i), new Color(255,0,255));
-        }
 
         // Draw the wall using its texture and shade
         for (int i = 0; i < height; i++) {
-            if (closestWall.isPortal) {
-                buffer.setPixel(col, (int) y + i, color);
-                continue;
-            }
             // Check if the Y pixel is on screen
-            if (y + i < 0 || y + i >= buffer.height) continue;
+            if (y + i < 0 || y + i >= screenH) continue;
             // Get the y position of the texture
             int texY = (int) (i / height * texH);
 
@@ -249,38 +279,31 @@ public class RayTracer {
             int texR = (texColor >> 16) & 0xFF;
             int texG = (texColor >> 8) & 0xFF;
             int texB = (texColor >> 0) & 0xFF;
+            int texA = (texColor >> 24) & 0xFF;
             // Calculate the color of the pixel on the wall
             r = (int) (texR * shade);
             g = (int) (texG * shade);
             b = (int) (texB * shade);
             color = new Color(r, g, b);
 
+            if (texA == 0) {
+                continue;
+            }
+
             // Draw the pixel
             buffer.setPixel(col, (int) y + i, color);
         }
 
-
-        // Get the floor color (placeholder lime green)
-        r = 200;
-        g = 200;
-        b = 200;
-
-        // Calculate the floor color
-        color = new Color(r, g, b);
-
         // Draw the floor
-        for (int i = 0; i < buffer.height - (y + height); i++) {
-
-            // Check if the Y pixel is on screen
-            if (y + height + i < 0 || y + height + i >= buffer.height) continue;
-            // Draw the pixel
-            buffer.setPixel(col, (int) (y + height + i), color);
-        }
-
-
-        // Draw the floor (lime green)
-        //buffer.drawFastVLine(col, (int) (y + height), (int) (buffer.height - (y + height)), new Color(0, 255, 0));
+        buffer.drawFastVLine(col, (int) (y + height), (int) (screenH - (y + height)), new Color(200, 200, 200));
         buffer.drawFastVLine(col, 0, (int) y, new Color(180, 180, 180));
+
+        // Convert the depth to a grayscale color
+        int depthColor = (int) (255 * (closestDist / (buffer.width / 2)));
+        // Make sure the depth color is between 0 and 255
+        depthColor = (int) Util.wrap(depthColor, 0, 255);
+        // Set the top 20 pixels to the depth color
+        //buffer.drawFastVLine(col, 0, 20, new Color(depthColor, depthColor, depthColor));
 
     }
 }

@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 
 public class FrameBuffer {
+
+    // It's an image with extra steps!
+
     public int width;
     public int height;
 
@@ -71,7 +74,7 @@ public class FrameBuffer {
             g.fillRect(i % width, i / width, 1, 1);
         }
         // Draw the image to the frame scaled to the frame's size
-        frame.getGraphics().drawImage(img, 0, 0, frame.getWidth(), frame.getHeight(), null);
+        frame.getContentPane().getGraphics().drawImage(img, 0, 0, frame.getContentPane().getWidth(), frame.getContentPane().getHeight(), null);
 
         // Dispose of the graphics context
         g.dispose();
@@ -95,19 +98,6 @@ public class FrameBuffer {
     public void drawFastVLine(int x, int y, int h, Color color) {
         for(int i = y; i < y + h; i++) {
             setPixel(x, i, color);
-        }
-    }
-
-    public void DrawString(String s, Vector2 pos, Color color) {
-        int x = (int)pos.x;
-        int y = (int)pos.y;
-        for(int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            int charIndex = (int)c - 32;
-            int charX = charIndex % 16;
-            int charY = charIndex / 16;
-            drawRect(x, y, 8, 8, color);
-            x += 8;
         }
     }
 

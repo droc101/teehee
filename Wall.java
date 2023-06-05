@@ -1,12 +1,10 @@
 public class Wall {
+
+    // This is a wall.
+
     public Vector2 vertA;
     public Vector2 vertB;
     public String texture;
-
-    public boolean isPortal = false;
-    public Sector portalSector = null;
-
-    public Integer loadTemp = -1;
 
     public Wall(Vector2 vertA, Vector2 vertB, String texture) {
         this.vertA = vertA;

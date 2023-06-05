@@ -1,6 +1,24 @@
-# Compile jni headers (Native.java) using javac -h native/ Native.java
+LOGFILES = $(wildcard *.log)
+CLASSFILES = $(wildcard *.class)
+SRCFILES = $(wildcard *.java)
 
-# Remove the generated class file (Native.class)
+clean:
+	rm -f $(LOGFILES)
+	rm -f $(CLASSFILES)
 
-# Execute make cleanall then make in the /native directory to compile the jni headers
+cleanall: clean
 
+headers:
+	javac -h native/ Native.java
+	rm -f Native.class
+
+native: headers
+	make -C native
+
+java:
+	javac $(SRCFILES)
+
+all: native
+
+run: native java
+	java main

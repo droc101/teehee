@@ -3,31 +3,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Sector {
-    public double floorHeight = 0;
-    public double ceilingHeight = 1;
-    public double lightLevel = 1.0;
-
-    public String floorTexture = "null";
-    public String ceilingTexture = "null";
 
     public ArrayList<Wall> walls = new ArrayList<Wall>();
 
 
     public Sector() {
 
-    }
-
-    public Sector(double floorHeight, double ceilingHeight, double lightLevel, String floorTexture, String ceilingTexture, Wall[] walls) {
-        this.floorHeight = floorHeight;
-        this.ceilingHeight = ceilingHeight;
-        this.lightLevel = lightLevel;
-        this.floorTexture = floorTexture;
-        this.ceilingTexture = ceilingTexture;
-        this.walls = (ArrayList<Wall>) Arrays.stream(walls).toList();
-        // Check if the sector is a closed shape
-        if (!isClosed()) {
-            throw new IllegalArgumentException("Sector is not a closed shape");
-        }
     }
 
     boolean isClosed() {

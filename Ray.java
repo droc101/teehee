@@ -1,7 +1,12 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Ray {
+
+    // more friendly wrapper for native raycast function (see Native.java and native/Native.c)
+
     public Vector2 origin;
     public double direction;
 
@@ -21,9 +26,6 @@ public class Ray {
         Wall closestWall = null;
         double closestDist = Double.MAX_VALUE;
         for (Wall wall : level.GetAllWalls()) {
-            if (wall.isPortal) {
-                continue; // Don't cast rays against portals
-            }
             Vector2 intersection = Intersection(wall);
             if (intersection != null) {
                 double distance = Vector2.Distance(origin, intersection);
@@ -38,6 +40,36 @@ public class Ray {
             return closestDist;
         }
         return -1;
+    }
+
+    public Entity HitscanEntities(Level level) {
+        HashMap<Entity, Wall> entityWalls = new HashMap<Entity, Wall>();
+        for (Entity entity : level.entities) {
+            Wall wall = entity.makeWall();
+            entityWalls.put(entity, wall);
+        }
+
+        // Find the closest wall
+        // key value pair of entity and wall
+        Entity closestWall = null;
+        Wall closestWallWall = null;
+        double closestDist = Double.MAX_VALUE;
+        for (Wall wall : entityWalls.values()) {
+            Vector2 intersection = Intersection(wall);
+            if (intersection != null) {
+                double distance = Vector2.Distance(origin, intersection);
+                if (distance < closestDist) {
+                    closestWall = entityWalls.entrySet().stream().filter(entry -> entry.getValue().equals(wall)).findFirst().get().getKey();
+                    closestWallWall = wall;
+                    closestDist = distance;
+                }
+            }
+        }
+        // If no wall was hit, return -1
+        if (closestDist == Double.MAX_VALUE) {
+            return null;
+        }
+        return closestWall;
     }
 
     public Vector2 Intersection(Wall wall) {

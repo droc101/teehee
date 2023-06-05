@@ -3,12 +3,17 @@ import java.io.FileNotFoundException; // Import this class to handle errors
 import java.util.*;
 
 public class Level {
+
+    // This class is responsible for loading levels from files and storing them in memory.
+
     public ArrayList<Entity> entities = new ArrayList<Entity>();
 
     public ArrayList<Sector> sectors = new ArrayList<Sector>();
     public String name;
     public Vector2 spawn;
     public double spawnRot;
+
+    sound bgm;
 
     enum LoadMode {
         HEADER,
@@ -17,7 +22,7 @@ public class Level {
         SECTORS
     }
 
-    public Level(String path) {
+    public Level(String path, Player player) {
         ArrayList<String> level = new ArrayList<>();
         // Read the contents of the file at levels/[path].rlev
         try {
@@ -68,6 +73,15 @@ public class Level {
                         spawn = new Vector2(Double.parseDouble(parts[1]), Double.parseDouble(parts[2]));
                         // Get the spawn rotation
                         spawnRot = Double.parseDouble(parts[3]);
+
+                        player.position = spawn.clone();
+                        player.rotation = spawnRot;
+                        player.health = 10;
+                        player.ammo = 0;
+
+                        String bgmPath = parts[4];
+                        bgm = new sound();
+                        bgm.play("audio/" + bgmPath + ".wav", true);
                         break;
                     case VERTS:
                         // Add a new vertex to the level
@@ -79,10 +93,7 @@ public class Level {
                         wall.vertA = verts.get(Integer.parseInt(parts[0]));
                         wall.vertB = verts.get(Integer.parseInt(parts[1]));
                         wall.texture = parts[2];
-                        if (parts.length > 3) {
-                            wall.isPortal = true;
-                            wall.loadTemp = Integer.parseInt(parts[3]);
-                        }
+
                         walls.add(wall);
                         break;
                     case SECTORS:
@@ -93,21 +104,8 @@ public class Level {
                         for (String wallStr : walll) {
                             sector.walls.add(walls.get(Integer.parseInt(wallStr)));
                         }
-                        sector.floorTexture = parts[1];
-                        sector.ceilingTexture = parts[2];
-                        sector.lightLevel = Double.parseDouble(parts[3]);
-                        sector.floorHeight = Double.parseDouble(parts[4]);
-                        sector.ceilingHeight = Double.parseDouble(parts[5]);
                         sectors.add(sector);
                         break;
-                }
-            }
-        }
-        // Now that all the walls have been loaded, we can set the portal sectors
-        for (Sector sector : sectors) {
-            for (Wall wall : sector.walls) {
-                if (wall.isPortal) {
-                    wall.portalSector = sectors.get(wall.loadTemp);
                 }
             }
         }
@@ -128,6 +126,11 @@ public class Level {
         for (Sector sector : sectors) {
             for (Wall wall : sector.walls) {
                 walls.add(wall);
+            }
+        }
+        for (Entity entity : entities) {
+            if (entity.doCollide) {
+                walls.add(entity.makeWall());
             }
         }
         return walls;

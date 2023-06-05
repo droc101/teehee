@@ -1,9 +1,15 @@
 public class Entity {
+
+    // Funny moving wall
+
     public Vector2 position = new Vector2(0, 0);
     public double rotation = 0;
 
     public double length = 1.0;
     public String texture = "null";
+    public boolean doCollide = false;
+
+    public boolean freeNextFrame = false;
 
     public Entity() {
 
@@ -14,7 +20,7 @@ public class Entity {
         this.rotation = rotation;
     }
 
-    public void update(Vector2 playerPos) {
+    public void update(Player player) {
 
     }
 
@@ -37,5 +43,9 @@ public class Entity {
                 position.y + (length / 2) * Math.sin(rotation));
 
         return new Wall(pos, pos2, texture);
+    }
+
+    public void onHit() {
+        
     }
 }

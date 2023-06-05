@@ -15,14 +15,6 @@ extern "C" {
 JNIEXPORT jdoubleArray JNICALL Java_Native_RayCast
   (JNIEnv *, jclass, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
 
-/*
- * Class:     Native
- * Method:    render_col
- * Signature: ([DDIIDILSector;)[I
- */
-JNIEXPORT jintArray JNICALL Java_Native_render_1col
-  (JNIEnv *, jclass, jdoubleArray, jdouble, jint, jint, jdouble, jint, jobject);
-
 #ifdef __cplusplus
 }
 #endif
