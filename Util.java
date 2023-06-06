@@ -63,12 +63,35 @@ public class Util {
     public static void LoadLibNative() {
         String os = System.getProperty("os.name");
         if (os.startsWith("Windows")) {
-            main.MessageBox("yeah so you cant run this on windows, go get linux", "Error");
-            System.exit(1);
+            String arch = System.getProperty("os.arch");
+            if (arch.equals("amd64")) {
+                System.out.println("64 bit NT detected");
+                String path = System.getProperty("user.dir") + "/native/libnative.dll";
+                try {
+                    System.out.println("Loading NT native library from: " + path);
+                    System.load(path);
+                } catch (Exception e) {
+                    System.out.println("Failed to load NT native library from: " + path);
+                    main.MessageBox("Failed to load NT native library from: " + path, "Error");
+                    System.exit(1);
+                }
+            } else {
+                main.MessageBox("this only runs on 64 bit systems, go get something modern", "Error");
+                System.exit(1);
+            }
         } else if (os.startsWith("Linux")) {
             String arch = System.getProperty("os.arch");
             if (arch.equals("amd64")) {
                 System.out.println("64 bit Linux detected");
+                String path = System.getProperty("user.dir") + "/native/libnative.so";
+                try {
+                    System.out.println("Loading native library from: " + path);
+                    System.load(path);
+                } catch (Exception e) {
+                    System.out.println("Failed to load native library from: " + path);
+                    main.MessageBox("Failed to load native library from: " + path, "Error");
+                    System.exit(1);
+                }
             } else {
                 main.MessageBox("this only runs on 64 bit systems, go get something modern", "Error");
                 System.exit(1);
@@ -78,15 +101,7 @@ public class Util {
             main.MessageBox("yeah so you cant run this on *unknown os*, go get linux", "Error");
             System.exit(1);
         }
-        String path = System.getProperty("user.dir") + "/native/libnative.so";
-        try {
-            System.out.println("Loading native library from: " + path);
-            System.load(path);
-        } catch (Exception e) {
-            System.out.println("Failed to load native library from: " + path);
-            main.MessageBox("Failed to load native library from: " + path, "Error");
-            System.exit(1);
-        }
+
     }
     
 }
