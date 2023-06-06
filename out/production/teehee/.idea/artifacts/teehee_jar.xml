@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="teehee:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/teehee_jar</output-path>
-    <root id="archive" name="teehee.jar">
-      <element id="module-output" name="teehee" />
-    </root>
-  </artifact>
-</component>
