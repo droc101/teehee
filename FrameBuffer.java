@@ -31,18 +31,10 @@ public class FrameBuffer {
         buffer[y * width + x] = c;
     }
 
-    public Color getPixel(int x, int y) {
-        return buffer[y * width + x];
-    }
-
     public void clear(Color c) {
         for(int i = 0; i < buffer.length; i++) {
             buffer[i] = c;
         }
-    }
-
-    public void clear() {
-        clear(new Color(0, 0, 0));
     }
 
     public void drawRect(int x, int y, int w, int h, Color c) {
@@ -51,15 +43,6 @@ public class FrameBuffer {
                 setPixel(i, j, c);
             }
         }
-    }
-
-    public void drawRectAbs(int x1, int y1, int x2, int y2, Color c) {
-        // Expects a rectangle
-        int x = Math.min(x1, x2);
-        int y = Math.min(y1, y2);
-        int w = Math.abs(x1 - x2);
-        int h = Math.abs(y1 - y2);
-        drawRect(x, y, w, h, c);
     }
 
     public void draw(JFrame frame) {
@@ -78,21 +61,6 @@ public class FrameBuffer {
 
         // Dispose of the graphics context
         g.dispose();
-    }
-
-    public void drawLine(int x, int y, int x2, int y2, Color color) {
-        int dx = x2 - x;
-        int dy = y2 - y;
-        int steps = Math.max(Math.abs(dx), Math.abs(dy));
-        float xInc = dx / (float)steps;
-        float yInc = dy / (float)steps;
-        float xCur = x;
-        float yCur = y;
-        for(int i = 0; i < steps; i++) {
-            setPixel((int)xCur, (int)yCur, color);
-            xCur += xInc;
-            yCur += yInc;
-        }
     }
 
     public void drawFastVLine(int x, int y, int h, Color color) {

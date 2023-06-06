@@ -6,6 +6,6 @@
 typedef struct {
     double x;
     double y;
-} Vector2;
+} Vector2; // A 2D vector
 
 #endif

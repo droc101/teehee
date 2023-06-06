@@ -2,7 +2,6 @@
 #define UTIL_H
 
 #include <stdlib.h>
-#include <string.h>
 #include "Structures.h"
 #include <math.h>
 

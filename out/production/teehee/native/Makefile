@@ -3,9 +3,9 @@ C_FILES = $(wildcard *.c) # Input C files
 H_FILES = $(wildcard *.h) # Input H files
 O_FILES = $(C_FILES:.c=.o) # Output O files
 CC = gcc # Compiler
-CFLAGS = -Winline -Og -fpic -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I/usr/lib/jvm/java-20-jdk/include -I/usr/lib/jvm/java-20-jdk/include/linux # Compiler flags
+CFLAGS = -Winline -Ofast -fdata-sections -ffunction-sections -Wl,--gc-sections -s  -nostdlib -fpic -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I/usr/lib/jvm/java-20-jdk/include -I/usr/lib/jvm/java-20-jdk/include/linux # Compiler flags
 LD = gcc # Linker
-LDFLAGS = -shared # Linker flags
+LDFLAGS = -shared -Wl,--gc-sections # Linker flags
 %.o: %.c $(H_FILES) # Compile C files
 	$(CC) $(CFLAGS) -c $< -o $@
 $(LIBRARY): $(O_FILES) # Link O files

@@ -11,22 +11,6 @@ public class Sector {
 
     }
 
-    boolean isClosed() {
-        // Check if each wall shares at least one point with the next wall
-        for (int i = 0; i < walls.size(); i++) {
-            Wall wall = walls.get(i);
-            Wall nextWall = walls.get((i + 1) % walls.size());
-            if (!wall.containsPoint(nextWall.vertA) && !wall.containsPoint(nextWall.vertB)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean containsWall(Wall wall) {
-        return walls.contains(wall);
-    }
-
     public boolean containsPoint(Vector2 point) {
         // Create a polygon from the sector walls
         Polygon polygon = new Polygon();

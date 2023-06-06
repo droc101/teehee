@@ -2,24 +2,6 @@ public class Util {
 
     // This class contains a bunch of utility functions that are used throughout the game
 
-    // Remap range function
-    static double Remap(double input, double inL, double inH, double outL, double outH) {
-        // Calculate the input range
-        double inRange = inH - inL;
-    
-        // Calculate the output range
-        double outRange = outH - outL;
-    
-        // Calculate the normalized input value
-        double normalizedInput = (input - inL) / inRange;
-    
-        // Remap the normalized input value to the output range
-        double output = outL + (normalizedInput * outRange);
-    
-        // Return the remapped value
-        return output;
-    }
-
     public static void DrawInt(FrameBuffer fb, Vector2 pos, int value) {
         // Convert the value to a string
         String str = Integer.toString(value);
