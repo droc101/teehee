@@ -1,7 +1,6 @@
 #include <stdlib.h> // C Standard Library
 #include <jni.h> // Java JNI Library
 #include "Structures.h" // Structures (Vector2)
-#include <math.h> // C Math Library
 #include "Util.h" // Utility functions
 
 // Yeah yeah this header sucks, blame JNI
