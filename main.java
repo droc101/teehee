@@ -80,10 +80,19 @@ public class main {
         currentLevel.entities.add(new KeyEntity(new Vector2(-4, 0), 0));
         currentLevel.entities.add(new DoorEntity(new Vector2(6,5.5), 2*Math.PI));
         currentLevel.entities.add(new AmmoEntity(new Vector2(7,-5), 0));
+        currentLevel.entities.add(new LevelEndEntity(new Vector2(-4,10), 0));
 
         // Event loop
         while (true) {
             GameIteration(frame, fb, player, currentLevel);
+            if (player.triggerWin) {
+                break;
+            }
+        }
+
+        if (player.triggerWin) {
+            Util.DrawString(fb, new Vector2(10,50), "YOU WIN");
+            fb.draw(frame);
         }
 
     }

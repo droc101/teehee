@@ -9,4 +9,6 @@ public class Player {
     int ammo = 0;
 
     int keys = 0;
+
+    boolean triggerWin = false;
 }

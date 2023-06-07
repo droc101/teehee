@@ -69,6 +69,22 @@ public class FrameBuffer {
         }
     }
 
+    public void FadeBy(int amount) {
+        for(int i = 0; i < buffer.length; i++) {
+            Color c = buffer[i];
+            c.r -= amount;
+            c.g -= amount;
+            c.b -= amount;
+
+            // Clamp the color values
+            if (c.r < 0) c.r = 0;
+            if (c.g < 0) c.g = 0;
+            if (c.b < 0) c.b = 0;
+
+            buffer[i] = c;
+        }
+    }
+
     public void BlitSpriteRect(String name, Vector2 screenPos, Vector2 texturePos, Vector2 textureSize) {
         String wallTex = "texture/" + name + ".png";
         // Load the texture using ImageIO
