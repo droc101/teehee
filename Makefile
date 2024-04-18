@@ -22,3 +22,5 @@ all: native
 
 run: native java
 	java main
+	rm -f $(LOGFILES)
+	rm -f $(CLASSFILES)

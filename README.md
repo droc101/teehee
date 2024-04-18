@@ -1,5 +1,8 @@
 # teehee
 This is my AP CSA final project. It's an old school FPS written in (mostly) java.
+This branch is for improvements I am making after the project was due. The original project is on the 'main' branch.
+
+Uses Java 22.
 
 ### File Structure
 / = Main java code
