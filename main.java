@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class main {
 
-    final static int TargetFPS = 20;
+    final static int TargetFPS = 20 ;
     public static long messageTime = 0;
     public static String message = "";
     static Input input = new Input();
