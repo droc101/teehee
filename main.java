@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class main {
 
-    final static int TargetFPS = 15;
+    final static int TargetFPS = 20;
     public static long messageTime = 0;
     public static String message = "";
     static Input input = new Input();
@@ -57,9 +57,8 @@ public class main {
         // Create a framebuffer
         FrameBuffer fb = new FrameBuffer(320, 640);
 
-
-
         // Draw the title screen
+        fb.drawRect(0, 0, fb.width, fb.height, new Color(0, 0, 0));
         Util.DrawString(fb, new Vector2(10,50), "GAME AND");
         Util.DrawString(fb, new Vector2(10,150), "Press SPACE to play");
         Util.DrawString(fb, new Vector2(10, 480-48), "by Droc101");
@@ -203,8 +202,8 @@ public class main {
         Util.DrawString(fb, new Vector2(30, fb.height-90), "HP");
         Util.DrawInt(fb, new Vector2(65, fb.height-90), player.health);
 
-        Util.DrawString(fb, new Vector2(10, fb.height-60), "FPS");
-        Util.DrawInt(fb, new Vector2(65, fb.height-60), (int) (1000 / (System.currentTimeMillis() - startTime)));
+        Util.DrawString(fb, new Vector2(0, fb.height-60), "FRTM"); // frame time
+        Util.DrawInt(fb, new Vector2(65, fb.height-60), (int) ((System.currentTimeMillis() - startTime)));
 
         Util.DrawString(fb, new Vector2(150, fb.height-90), "AMMO");
         Util.DrawInt(fb, new Vector2(220, fb.height-90), player.ammo);
@@ -235,8 +234,6 @@ public class main {
             System.exit(0);
 
         }
-
-        //Message("POS " + player.position.toString());
 
         fb.draw(frame);
 
