@@ -5,8 +5,6 @@
 #include "Structures.h"
 #include <math.h>
 
-char *getWD();
-
 Vector2 vec2(double x, double y);
 
 double min(double a, double b);

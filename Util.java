@@ -60,6 +60,15 @@ public class Util {
         return value;
     }
 
+    public static double clamp(double value, double minValue, double maxValue) {
+        if (value < minValue) {
+            value = minValue;
+        } else if (value > maxValue) {
+            value = maxValue;
+        }
+        return value;
+    }
+
     public static void LoadLibNative() {
         String os = System.getProperty("os.name");
         if (os.startsWith("Windows")) {

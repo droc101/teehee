@@ -11,30 +11,23 @@ public class FrameBuffer {
     public int width;
     public int height;
 
-    Color[] buffer;
+    java.awt.image.BufferedImage img;
+    java.awt.Graphics2D gfx;
 
     public FrameBuffer(int width, int height) {
         this.width = width;
         this.height = height;
-        buffer = new Color[width * height];
-        // Initialize the buffer to black
-        for(int i = 0; i < buffer.length; i++) {
-            buffer[i] = new Color(0, 0, 0);
-        }
+        img = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        gfx = img.createGraphics();
     }
 
     public void setPixel(int x, int y, Color c) {
         // Check if the pixel is out of bounds
-        if(x < 0 || x >= width || y < 0 || y >= height) {
+        if (x < 0 || x >= width || y < 0 || y >= height) {
             return;
         }
-        buffer[y * width + x] = c;
-    }
-
-    public void clear(Color c) {
-        for(int i = 0; i < buffer.length; i++) {
-            buffer[i] = c;
-        }
+        gfx.setColor(c.toAWTColor());
+        gfx.fillRect(x, y, 1, 1);
     }
 
     public void drawRect(int x, int y, int w, int h, Color c) {
@@ -46,42 +39,12 @@ public class FrameBuffer {
     }
 
     public void draw(JFrame frame) {
-        // Create a java.awt.image.BufferedImage from the framebuffer
-        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-        // Get the image's graphics context
-        java.awt.Graphics2D g = img.createGraphics();
-        // Draw the framebuffer to the image
-        for(int i = 0; i < buffer.length; i++) {
-            Color c = buffer[i];
-            g.setColor(new java.awt.Color(c.r & 0xFF, c.g & 0xFF, c.b & 0xFF, c.a & 0xFF));
-            g.fillRect(i % width, i / width, 1, 1);
-        }
-        // Draw the image to the frame scaled to the frame's size
         frame.getContentPane().getGraphics().drawImage(img, 0, 0, frame.getContentPane().getWidth(), frame.getContentPane().getHeight(), null);
-
-        // Dispose of the graphics context
-        g.dispose();
     }
 
     public void drawFastVLine(int x, int y, int h, Color color) {
         for(int i = y; i < y + h; i++) {
             setPixel(x, i, color);
-        }
-    }
-
-    public void FadeBy(int amount) {
-        for(int i = 0; i < buffer.length; i++) {
-            Color c = buffer[i];
-            c.r -= amount;
-            c.g -= amount;
-            c.b -= amount;
-
-            // Clamp the color values
-            if (c.r < 0) c.r = 0;
-            if (c.g < 0) c.g = 0;
-            if (c.b < 0) c.b = 0;
-
-            buffer[i] = c;
         }
     }
 
@@ -134,20 +97,7 @@ public class FrameBuffer {
             }
         }
 
-        // Blit the texture to the framebuffer
-        for(int i = 0; i < tex.getWidth(); i++) {
-            for(int j = 0; j < tex.getHeight(); j++) {
-                int pixel = tex.getRGB(i, j);
-                int r = (pixel >> 16) & 0xFF;
-                int g = (pixel >> 8) & 0xFF;
-                int b = (pixel >> 0) & 0xFF;
-                int a = (pixel >> 24) & 0xFF;
-                if(a == 0) {
-                    continue;
-                }
-                setPixel((int)pos.x + i, (int)pos.y + j, new Color(r, g, b));
-            }
-        }
+        gfx.drawImage(tex, (int)pos.x, (int)pos.y, null);
     }
 
 }

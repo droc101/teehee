@@ -3,7 +3,6 @@
 #include <math.h>
 
 #define PI 3.14159265358979323846 // Pie is yummy
-#define uint unsigned int
 
 Vector2 vec2(double x, double y) // Create a Vector2
 {

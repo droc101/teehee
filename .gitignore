@@ -24,7 +24,7 @@ hs_err_pid*
 replay_pid*
 
 # output
-out/*
+out
 native/*.so
 native/*.dll
 native/*.o

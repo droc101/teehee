@@ -6,11 +6,12 @@ import java.util.HashMap;
 
 public class main {
 
-    final static int TargetFPS = 60;
+    final static int TargetFPS = 15;
     public static long messageTime = 0;
     public static String message = "";
     static Input input = new Input();
     public static final int messageTimeMax = 5; // Time (in seconds) to display a message
+    static RayTracer rt;
 
     public static void Message(String msg) {
         message = msg;
@@ -56,6 +57,8 @@ public class main {
         // Create a framebuffer
         FrameBuffer fb = new FrameBuffer(320, 640);
 
+
+
         // Draw the title screen
         Util.DrawString(fb, new Vector2(10,50), "GAME AND");
         Util.DrawString(fb, new Vector2(10,150), "Press SPACE to play");
@@ -75,12 +78,14 @@ public class main {
         Player player = new Player();
         Level currentLevel = new Level("test", player);
 
-        // Forcefully add some entities for testing
+        // hardcoded entities :P
         currentLevel.entities.add(new TestEntity(new Vector2(-3,-7.5), 0));
         currentLevel.entities.add(new KeyEntity(new Vector2(-4, 0), 0));
         currentLevel.entities.add(new DoorEntity(new Vector2(6,5.5), 2*Math.PI));
         currentLevel.entities.add(new AmmoEntity(new Vector2(7,-5), 0));
         currentLevel.entities.add(new LevelEndEntity(new Vector2(-4,10), 0));
+
+        rt = new RayTracer(currentLevel, fb.width);
 
         // Event loop
         while (true) {
@@ -184,16 +189,8 @@ public class main {
             e.update(player);
         }
 
-        //FrameBuffer fb = new FrameBuffer(width, height);
-
-
-        RayTracer rt = new RayTracer(currentLevel, fb.width);
 
         for (int x = 0; x < fb.width; x++) {
-            // Fill the top half of the screen with blue
-            //fb.drawFastVLine(x, 0, fb.height / 2, new Color(43, 36, 29));
-            //fb.drawFastVLine(x, fb.height / 2, fb.height / 2, new Color(13, 6, 0));
-
             rt.RenderCol(fb, player.position, player.rotation, x, fb.height - 100, currentLevel.findSector(player.position));
             rt.RenderColPass2(fb, player.position, player.rotation, x, fb.height - 100);
         }
@@ -201,7 +198,7 @@ public class main {
         fb.BlitSprite("barrel", new Vector2(fb.width / 2 - 64, fb.height - 356));
 
         // Draw a rect on the last 100px of the screen
-        fb.drawRect(0, fb.height - 100, fb.width, 100, new Color(40, 25, 25));
+        fb.drawRect(0, fb.height - 100, fb.width, 100, new Color(200, 200, 200));
 
         Util.DrawString(fb, new Vector2(30, fb.height-90), "HP");
         Util.DrawInt(fb, new Vector2(65, fb.height-90), player.health);
@@ -249,10 +246,6 @@ public class main {
         // Calculate the time it took to render the frame
         long frameTime = endTime - startTime;
 
-        // Check if the frame took too long to render
-        if (frameTime > 1000 / TargetFPS) {
-            //System.out.println("Frame took too long to render: " + frameTime + "ms");
-        }
 
         // Wait for the next frame
         try {
@@ -260,5 +253,6 @@ public class main {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
     }
 }
